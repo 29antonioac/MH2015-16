@@ -7,6 +7,18 @@ from sklearn import cross_validation
 def flip(selected_features, idx):
     selected_features[idx] = not selected_features[idx]
 
+def score_solution(selected_features, data_number, scores, classifier):
+    loo = cross_validation.LeaveOneOut(data_number)
+
+    for idx, partition_idx in enumerate(loo):
+        train_index = partition_idx[0]
+        test_index = partition_idx[1]
+        X_train, X_test = data_train[train_index], data_train[test_index]
+        y_train, y_test = target_train[train_index], target_train[test_index]
+        classifier.fit(X_train[:,selected_features], y_train)
+        scores[idx] = classifier.score(X_test[:,selected_features], y_test)
+    return np.mean(scores)
+
 def SFS(data_train, target_train, classifier):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
@@ -24,18 +36,9 @@ def SFS(data_train, target_train, classifier):
                 continue
 
             selected_features[data_idx] = True
-            loo = cross_validation.LeaveOneOut(data_number)
-
-            for idx, partition_idx in enumerate(loo):
-                train_index = partition_idx[0]
-                test_index = partition_idx[1]
-                X_train, X_test = data_train[train_index], data_train[test_index]
-                y_train, y_test = target_train[train_index], target_train[test_index]
-                classifier.fit(X_train[:,selected_features], y_train)
-                scores[idx] = classifier.score(X_test[:,selected_features], y_test)
+            score = score_solution(selected_features, data_number, scores, classifier)
             selected_features[data_idx] = False
 
-            score = np.mean(scores)
             if score > best_score:
                 best_score = score
                 best_feature = data_idx
