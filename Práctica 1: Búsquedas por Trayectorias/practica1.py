@@ -12,6 +12,8 @@ from time import time
 from Metaheuristics import *
 
 def main():
+    np.random.seed(12345678)
+
     logging.basicConfig(level=logging.INFO)
 
     logger = logging.getLogger(__name__)
