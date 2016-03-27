@@ -34,11 +34,13 @@ def SFS(data_train, data_test, target_train, target_test, classifier):
 
     return selected_features, best_score
 
-def LS(data_train, data_test, target_train, target_test, classifier):
+def LS(data_train, data_test, target_train, target_test, classifier, initial_sol = None):
     rowsize = len(data_train[0])
-    selected_features = np.zeros(rowsize, dtype=np.bool)
+    if initial_sol is None:
+        initial_sol = np.zeros(rowsize, dtype=np.bool)
+        initial_sol[0] = True
 
-    selected_features[0] = True
+    selected_features = initial_sol
 
     end = False
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import multiprocessing as mp
 import sys
 import logging
 import numpy as np
@@ -8,10 +9,12 @@ from sklearn import neighbors
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 
+
 from time import time
 from Metaheuristics import *
 
 def main():
+
     np.random.seed(12345678)
 
     logging.basicConfig(level=logging.INFO)
@@ -47,13 +50,14 @@ def main():
 
            logger.info("SFS - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Selected features: " + str(sum(selected_features)))
 
-           start = time()
-           selected_features, score = LS(data_train, data_test, target_train, target_test, knn)
-           end = time()
-
-           logger.info("LS - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Selected features: " + str(sum(selected_features)))
+        #    start = time()
+        #    selected_features, score = LS(data_train, data_test, target_train, target_test, knn)
+        #    end = time()
+           #
+        #    logger.info("LS - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Selected features: " + str(sum(selected_features)))
 
 
 
 if __name__ == "__main__":
+    mp.set_start_method('forkserver')
     main()
