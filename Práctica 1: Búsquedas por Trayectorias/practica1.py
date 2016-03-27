@@ -32,18 +32,18 @@ def main():
 
     knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = -1)
 
-    skf = StratifiedKFold(target, n_folds=2, shuffle=True)
+    for iteration in range(5):
+        skf = StratifiedKFold(target, n_folds=2, shuffle=True)
 
-    for train_index, test_index in skf:
-       data_train, data_test = data[train_index], data[test_index]
-       target_train, target_test = target[train_index], target[test_index]
+        for train_index, test_index in skf:
+           data_train, data_test = data[train_index], data[test_index]
+           target_train, target_test = target[train_index], target[test_index]
 
-       start = time()
-       selected_features, score = SFS(data_train, data_test, target_train, target_test, feature_names, knn)
-       end = time()
+           start = time()
+           selected_features, score = SFS(data_train, data_test, target_train, target_test, knn)
+           end = time()
 
-       logger.info("Time elapsed: " + str(end-start))
-    # knn.fit(iris.data, iris.target)
+           logger.info("Time elapsed: " + str(end-start))
 
 if __name__ == "__main__":
     main()

@@ -3,8 +3,9 @@
 import numpy as np
 from sklearn import neighbors
 
-def SFS(data_train, data_test, target_train, target_test, feature_names, classifier):
-    selected_features = np.zeros(len(feature_names), dtype=np.bool)
+def SFS(data_train, data_test, target_train, target_test, classifier):
+    rowsize = len(data_train[0])
+    selected_features = np.zeros(len(rowsize), dtype=np.bool)
     best_score = 0
     best_feature = 0
 
@@ -12,7 +13,7 @@ def SFS(data_train, data_test, target_train, target_test, feature_names, classif
         end = True
         best_feature = None
 
-        for idx, feature in enumerate(feature_names):
+        for idx in range(rowsize):
             if selected_features[idx]:
                 continue
 
