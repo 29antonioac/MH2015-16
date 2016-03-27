@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import multiprocessing as mp
+
 import sys
 import logging
 import numpy as np
@@ -35,7 +35,7 @@ def main():
     target = dataset[:]["class"]            # Only the class column
     target = np.asarray(target.tolist(), dtype=np.int16)
 
-    knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = -1)
+    knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = 1)
 
     for iteration in range(5):
         skf = StratifiedKFold(target, n_folds=2, shuffle=True)
@@ -59,5 +59,5 @@ def main():
 
 
 if __name__ == "__main__":
-    mp.set_start_method('forkserver')
+    #import multiprocessing as mp; mp.set_start_method('forkserver', force = True)
     main()
