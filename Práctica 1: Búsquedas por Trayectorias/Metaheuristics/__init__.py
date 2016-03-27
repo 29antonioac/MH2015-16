@@ -5,7 +5,7 @@ from sklearn import neighbors
 
 def SFS(data_train, data_test, target_train, target_test, classifier):
     rowsize = len(data_train[0])
-    selected_features = np.zeros(len(rowsize), dtype=np.bool)
+    selected_features = np.zeros(rowsize, dtype=np.bool)
     best_score = 0
     best_feature = 0
 
