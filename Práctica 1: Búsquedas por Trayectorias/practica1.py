@@ -8,6 +8,7 @@ from sklearn import neighbors
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 
+from time import time
 from Metaheuristics import *
 
 def main():
@@ -36,10 +37,12 @@ def main():
     for train_index, test_index in skf:
        data_train, data_test = data[train_index], data[test_index]
        target_train, target_test = target[train_index], target[test_index]
+
+       start = time()
        selected_features, score = SFS(data_train, data_test, target_train, target_test, feature_names, knn)
+       end = time()
 
-
-       logger.info(knn.score(data_test,target_test))
+       logger.info("Time elapsed: " + str(end-start))
     # knn.fit(iris.data, iris.target)
 
 if __name__ == "__main__":

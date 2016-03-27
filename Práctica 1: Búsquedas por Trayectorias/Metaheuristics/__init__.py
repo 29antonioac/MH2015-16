@@ -8,10 +8,6 @@ def SFS(data_train, data_test, target_train, target_test, feature_names, classif
     best_score = 0
     best_feature = 0
 
-    # selected_features[0] = True
-    # print(data_train[:,selected_features])
-    print(target_train)
-
     while best_feature is not None:
         end = True
         best_feature = None
@@ -22,7 +18,7 @@ def SFS(data_train, data_test, target_train, target_test, feature_names, classif
 
             selected_features[idx] = True
             classifier.fit(data_train[:,selected_features], target_train)
-            score = classifier.score(data_test, target_test)
+            score = classifier.score(data_test[:,selected_features], target_test)
             selected_features[idx] = False
 
             if score > best_score:
