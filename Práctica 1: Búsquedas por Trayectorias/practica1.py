@@ -45,10 +45,13 @@ def main():
            target_train, target_test = target[train_index], target[test_index]
 
            start = time()
-           selected_features, score = SFS(data_train, data_test, target_train, target_test, knn)
+           selected_features, score = SFS(data_train, target_train, knn)
            end = time()
 
-           logger.info("SFS - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Selected features: " + str(sum(selected_features)))
+           knn.fit(data_train[:,selected_features], target_train)
+           score_out = knn.score(data_test[:,selected_features], target_test)
+
+           logger.info("SFS - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Score out: " + str(score_out) + " Selected features: " + str(sum(selected_features)))
 
         #    start = time()
         #    selected_features, score = LS(data_train, data_test, target_train, target_test, knn)
