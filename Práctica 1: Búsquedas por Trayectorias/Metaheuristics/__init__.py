@@ -7,7 +7,7 @@ from sklearn import cross_validation
 def flip(selected_features, idx):
     selected_features[idx] = not selected_features[idx]
 
-def score_solution(selected_features, data_number, scores, classifier):
+def score_solution(data_train, target_train, selected_features, data_number, scores, classifier):
     loo = cross_validation.LeaveOneOut(data_number)
 
     for idx, partition_idx in enumerate(loo):
@@ -36,7 +36,7 @@ def SFS(data_train, target_train, classifier):
                 continue
 
             selected_features[data_idx] = True
-            score = score_solution(selected_features, data_number, scores, classifier)
+            score = score_solution(data_train, target_train, selected_features, data_number, scores, classifier)
             selected_features[data_idx] = False
 
             if score > best_score:
