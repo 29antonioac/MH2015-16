@@ -99,26 +99,26 @@ def SA(data_train, target_train, classifier):
     selected_features = initial_sol
     scores = np.zeros(data_number, dtype=np.float32)
 
-    best_score = 100*score_solution(data_train, target_train, selected_features, scores, classifier)
+    best_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+    actual_score = best_score
 
     T0 = mu * best_score / (-np.log(phi))
-    print("T0 =", T0, "\tmu =", mu, "\tC(S0) =", best_score, "den =", -np.log(phi))
     Tf = 1e-3
+    
     max_neighbors = 10 * rowsize
     max_accepted = 0.1 * max_neighbors
     M = np.ceil(MAX_EVALUATIONS / max_neighbors)
 
     T = T0
     evaluations = 0
-    print("T =", T, " | Tf =", Tf)
+    actual_neighbors = 0
+    accepted_neighbors = 0
+
     while T >= Tf and evaluations < MAX_EVALUATIONS:
-        actual_neighbors = 0
-        accepted_neighbors = 0
         while evaluations < MAX_EVALUATIONS and actual_neighbors < max_neighbors and accepted_neighbors < max_accepted:
-            actual_score = 100*score_solution(data_train, target_train, selected_features, scores, classifier)
             feature = np.random.randint(rowsize)
             flip(selected_features, feature)
-            new_score = 100*score_solution(data_train, target_train, selected_features, scores, classifier)
+            new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
             flip(selected_features, feature)
             deltaF = new_score - actual_score
 
@@ -126,13 +126,12 @@ def SA(data_train, target_train, classifier):
             actual_neighbors += 1
             if (deltaF != 0) and (deltaF > 0 or np.random.uniform() < np.exp(deltaF/T)):
                 accepted_neighbors += 1
-                if new_score > best_score:
+                actual_score = new_score
+                if actual_score > best_score:
                     best_score = new_score
                     flip(selected_features, feature)
 
         beta = (T0 - Tf) / (M * T0 * Tf)
         T = T / (1 + beta * T)
-        print("T =", T, "\t| Tf =", Tf, "\t| Evals =", evaluations)
-
 
     return selected_features, best_score
