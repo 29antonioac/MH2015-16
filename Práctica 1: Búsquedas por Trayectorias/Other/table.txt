@@ -1,0 +1,21 @@
+\begin{table}[]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\cline{2-13}
+                                    & \multicolumn{4}{c|}{Wdbc}             & \multicolumn{4}{c|}{Movement\_Libras} & \multicolumn{4}{c|}{Arrhythmia}       \\ \cline{2-13}
+                                    & \% clas in & \% clas out & \% red & T & \% clas in & \% clas out & \% red & T & \% clas in & \% clas out & \% red & T \\ \hline
+\multicolumn{1}{|c|}{Partición 1-1} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 1-2} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 2-1} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 2-2} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 3-1} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 3-2} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 4-1} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 4-2} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 5-1} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Partición 5-2} &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\multicolumn{1}{|c|}{Media}         &            &             &        &   &            &             &        &   &            &             &        &   \\ \hline
+\end{tabular}
+\end{table}
