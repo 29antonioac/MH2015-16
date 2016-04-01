@@ -4,6 +4,8 @@ import numpy as np
 from sklearn import neighbors
 from sklearn import cross_validation
 
+MAX_EVALUATIONS = 15000
+
 def flip(selected_features, idx):
     selected_features[idx] = not selected_features[idx]
 
@@ -62,13 +64,15 @@ def LS(data_train, target_train, classifier):
     end = False
 
     best_score = score_solution(data_train, target_train, selected_features, scores, classifier)
-
-    while not end:
+    evaluations = 1
+    while not end and evaluations < MAX_EVALUATIONS:
         l_neighbors = list(enumerate(selected_features))
         np.random.shuffle(l_neighbors)
         for idx, feature in l_neighbors:
             if feature:
                 continue
+            if evaluations >= MAX_EVALUATIONS:
+                break
 
             flip(selected_features, idx)
 
@@ -89,31 +93,46 @@ def SA(data_train, target_train, classifier):
     mu = 0.3
     phi = 0.3
     rowsize = len(data_train[0])
+    data_number = data_train.shape[0]
     initial_sol = np.zeros(rowsize, dtype=np.bool)
     initial_sol[np.random.randint(2)] = True
     selected_features = initial_sol
-    best_score = score_solution(data_train, target_train, selected_features, scores, classifier)
-
     scores = np.zeros(data_number, dtype=np.float32)
 
-    T0 = mu * score / (-np.log(phi))
+    best_score = 100*score_solution(data_train, target_train, selected_features, scores, classifier)
+
+    T0 = mu * best_score / (-np.log(phi))
+    print("T0 =", T0, "\tmu =", mu, "\tC(S0) =", best_score, "den =", -np.log(phi))
     Tf = 1e-3
-    max_iterations = 15000
     max_neighbors = 10 * rowsize
     max_accepted = 0.1 * max_neighbors
-    max_eval = 15000
-    M = np.ceil(max_eval / max_neighbors)
+    M = np.ceil(MAX_EVALUATIONS / max_neighbors)
 
     T = T0
-    iterations = 0
-    while T <= Tf or iterations < max_iterations:
+    evaluations = 0
+    print("T =", T, " | Tf =", Tf)
+    while T >= Tf and evaluations < MAX_EVALUATIONS:
         actual_neighbors = 0
         accepted_neighbors = 0
-        while actual_neighbors < max_neighbors and accepted_neighbors < max_accepted:
-            actual_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+        while evaluations < MAX_EVALUATIONS and actual_neighbors < max_neighbors and accepted_neighbors < max_accepted:
+            actual_score = 100*score_solution(data_train, target_train, selected_features, scores, classifier)
             feature = np.random.randint(rowsize)
-            flip(selected_features, features)
-            new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
             flip(selected_features, feature)
+            new_score = 100*score_solution(data_train, target_train, selected_features, scores, classifier)
+            flip(selected_features, feature)
+            deltaF = new_score - actual_score
 
-            if
+            evaluations += 1
+            actual_neighbors += 1
+            if (deltaF != 0) and (deltaF > 0 or np.random.uniform() < np.exp(deltaF/T)):
+                accepted_neighbors += 1
+                if new_score > best_score:
+                    best_score = new_score
+                    flip(selected_features, feature)
+
+        beta = (T0 - Tf) / (M * T0 * Tf)
+        T = T / (1 + beta * T)
+        print("T =", T, "\t| Tf =", Tf, "\t| Evals =", evaluations)
+
+
+    return selected_features, best_score

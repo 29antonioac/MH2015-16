@@ -23,11 +23,13 @@ def main():
     logger = logging.getLogger(__name__)
 
     algorithms_table = {}
-    algorithms = [LS]
+    algorithms = [SA]
 
     databases = {   "W" : "Data/wdbc.arff",
                     "M" : "Data/movement_libras.arff",
                     "A" : "Data/arrhythmia.arff"}
+
+    databases = { "W" : "Data/wdbc.arff" }
 
     for key, value in databases.items():
         np.random.seed(12345678)
@@ -49,7 +51,6 @@ def main():
         n_folds = 2
 
         for iteration in range(repeats):
-            print("Iteration",iteration,"/",repeats)
             skf = StratifiedKFold(target, n_folds=n_folds, shuffle=True)
 
             for run, partition in enumerate(skf):
