@@ -3,15 +3,16 @@
 
 import sys
 import logging
+import pystache
 import numpy as np
 from scipy.io import arff
 from sklearn import neighbors
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 
-
 from time import time
 from Metaheuristics import *
+
 
 def main():
 
@@ -20,6 +21,12 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     logger = logging.getLogger(__name__)
+
+
+
+    databases = {   "W" : "Data/wdbc.arff",
+                "L" : "Data/movement_libras.arff",
+                "A" : "Data/arrhythmia.arff"}
 
     dataset, metadata = arff.loadarff("Data/wdbc.arff")
     # dataset, metadata = arff.loadarff("Data/movement_libras.arff")
@@ -35,32 +42,52 @@ def main():
     target = dataset[:]["class"]            # Only the class column
     target = np.asarray(target.tolist(), dtype=np.int16)
 
+    algorithms_table = {}
+    algorithms = [LS]
+
     knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = 1)
 
-    for iteration in range(5):
+    for iteration in range(1):
         skf = StratifiedKFold(target, n_folds=2, shuffle=True)
 
-        for train_index, test_index in skf:
-           data_train, data_test = data[train_index], data[test_index]
-           target_train, target_test = target[train_index], target[test_index]
+        for run, partition in enumerate(skf):
+            train_index = partition[0]
+            test_index = partition[1]
+            data_train, data_test = data[train_index], data[test_index]
+            target_train, target_test = target[train_index], target[test_index]
 
-           start = time()
-           selected_features, score = SFS(data_train, target_train, knn)
-           end = time()
+            for alg in algorithms:
+                actual_table = algorithms_table.setdefault(alg.__name__, {})
+                actual_items = actual_table.setdefault("items", [])
+                item = {}
 
-           knn.fit(data_train[:,selected_features], target_train)
-           score_out = knn.score(data_test[:,selected_features], target_test)
+                start = time()
+                selected_features, score = alg(data_train, target_train, knn)
+                end = time()
 
-           logger.info("SFS - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Score out: " + str(score_out) + " Selected features: " + str(sum(selected_features)))
+                knn.fit(data_train[:,selected_features], target_train)
+                score_out = knn.score(data_test[:,selected_features], target_test)
 
-        #    start = time()
-        #    selected_features, score = LS(data_train, data_test, target_train, target_test, knn)
-        #    end = time()
-           #
-        #    logger.info("LS - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Selected features: " + str(sum(selected_features)))
+                item["name"] = "Partición " + str(iteration+1) + "-" + str(run+1)
+                item["W_clas_in"] = score
+                item["W_clas_out"] = score_out
+                item["W_red"] = 100*(len(selected_features) - sum(selected_features)) / len(selected_features)
+                item["W_T"] = end-start
 
+                actual_items.append(item)
 
+                print()
 
+                logger.info(str(alg.__name__) + " - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Score out: " + str(score_out) + " Selected features: " + str(sum(selected_features)))
+
+    print("Volcando tablas...")
+    print(algorithms_table)
+    print("-----------------")
+    print(algorithms_table["LS"])
+    with open("Other/template.mu", "r") as template:
+        for alg in algorithms:
+            with open("Other/"+alg.__name__+"-result.mu", "w") as dest:
+                dest.write(pystache.render(template.read(), algorithms_table[alg.__name__]))
 if __name__ == "__main__":
     #import multiprocessing as mp; mp.set_start_method('forkserver', force = True)
     main()
