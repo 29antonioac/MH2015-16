@@ -48,28 +48,31 @@ def SFS(data_train, target_train, classifier):
 
     return selected_features, best_score
 
-def LS(data_train, data_test, target_train, target_test, classifier, initial_sol = None):
+def LS(data_train, target_train, classifier):
     rowsize = len(data_train[0])
-    if initial_sol is None:
-        initial_sol = np.zeros(rowsize, dtype=np.bool)
-        initial_sol[0] = True
+    data_number = data_train.shape[0]
+
+    initial_sol = np.zeros(rowsize, dtype=np.bool)
+    initial_sol[np.random.randint(2)] = True
+
+    scores = np.zeros(data_number, dtype=np.float32)
 
     selected_features = initial_sol
 
     end = False
 
-    classifier.fit(data_train[:,selected_features], target_train)
-    best_score = classifier.score(data_test[:,selected_features], target_test)
+    best_score = score_solution(data_train, target_train, selected_features, data_number, scores, classifier)
 
     while not end:
-        for idx, feature in enumerate(selected_features):
+        neighbors = list(enumerate(selected_features))
+        np.random.shuffle(neighbors)
+        for idx, feature in neighbors:
             if feature:
                 continue
 
             flip(selected_features, idx)
 
-            classifier.fit(data_train[:,selected_features], target_train)
-            score = classifier.score(data_test[:,selected_features], target_test)
+            score = score_solution(data_train, target_train, selected_features, data_number, scores, classifier)
 
             flip(selected_features, idx)
 
@@ -77,6 +80,10 @@ def LS(data_train, data_test, target_train, target_test, classifier, initial_sol
                 best_score = score
                 flip(selected_features, idx)
                 break
-        end = True
+        else:
+            end = True
 
     return selected_features, best_score
+
+def SA(data_train, data_test, target_train, target_test, classifier, initial_sol = None):
+    pass
