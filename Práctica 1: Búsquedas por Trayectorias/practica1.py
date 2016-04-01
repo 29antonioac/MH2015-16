@@ -77,12 +77,12 @@ def main():
                     item[key+"_T"] = end-start
 
                     logger.info(key + " - " + str(alg.__name__) + " - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Score out: " + str(score_out) + " Selected features: " + str(sum(selected_features)))
-    import pprint
-    pp = pprint.PrettyPrinter(indent=4)
-    print("Volcando tablas...")
-    pp.pprint(algorithms_table)
-    print("-----------------")
-    pp.pprint(algorithms_table["LS"])
+    # import pprint
+    # pp = pprint.PrettyPrinter(indent=4)
+    # print("Volcando tablas...")
+    # pp.pprint(algorithms_table)
+    # print("-----------------")
+    # pp.pprint(algorithms_table["LS"])
     with open("Other/template.mu", "r") as template:
         for alg in algorithms:
             with open("Other/"+alg.__name__+"-result.mu", "w") as dest:
