@@ -54,8 +54,7 @@ def LS(data_train, target_train, classifier):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
 
-    initial_sol = np.zeros(rowsize, dtype=np.bool)
-    initial_sol[np.random.randint(2)] = True
+    initial_sol = np.random.choice([True, False], rowsize)
 
     scores = np.zeros(data_number, dtype=np.float32)
 
@@ -94,8 +93,7 @@ def SA(data_train, target_train, classifier):
     phi = 0.3
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
-    initial_sol = np.zeros(rowsize, dtype=np.bool)
-    initial_sol[np.random.randint(2)] = True
+    initial_sol = np.random.choice([True, False], rowsize)
     selected_features = initial_sol
     scores = np.zeros(data_number, dtype=np.float32)
 
@@ -146,8 +144,7 @@ def TS(data_train, target_train, classifier):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
 
-    initial_sol = np.zeros(rowsize, dtype=np.bool)
-    initial_sol[np.random.randint(2)] = True
+    initial_sol = np.random.choice([True, False], rowsize)
 
     scores = np.zeros(data_number, dtype=np.float32)
 
@@ -205,8 +202,7 @@ def TSext(data_train, target_train, classifier):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
 
-    initial_sol = np.zeros(rowsize, dtype=np.bool)
-    initial_sol[np.random.randint(2)] = True
+    initial_sol = np.random.choice([True, False], rowsize)
 
     scores = np.zeros(data_number, dtype=np.float32)
     frec = np.zeros(rowsize, dtype=np.int32)
@@ -232,7 +228,7 @@ def TSext(data_train, target_train, classifier):
         best_feature = -1
 
         if iterations_without_improve >= 10:
-            print("Reset!")
+            # print("Reset!")
             iterations_without_improve = 0
             choice = np.random.uniform()
             if choice < 0.25: # New random solution
