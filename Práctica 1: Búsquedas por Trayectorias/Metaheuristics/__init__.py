@@ -99,6 +99,7 @@ def SA(data_train, target_train, classifier):
 
     best_score = score_solution(data_train, target_train, selected_features, scores, classifier)
     actual_score = best_score
+    best_solution = np.copy(initial_sol)
 
     T0 = mu * best_score / (-np.log(phi))
     Tf = 1e-3
@@ -131,14 +132,15 @@ def SA(data_train, target_train, classifier):
             if (deltaF != 0) and (deltaF > 0 or np.random.uniform() < np.exp(deltaF/T)):
                 accepted_neighbors += 1
                 actual_score = new_score
+                flip(selected_features, feature)
                 if actual_score > best_score:
                     best_score = new_score
-                    flip(selected_features, feature)
+                    best_solution = np.copy(selected_features)
 
         beta = (T0 - Tf) / (M * T0 * Tf)
         T = T / (1 + beta * T)
 
-    return selected_features, best_score
+    return best_solution, best_score
 
 def TS(data_train, target_train, classifier):
     rowsize = len(data_train[0])
