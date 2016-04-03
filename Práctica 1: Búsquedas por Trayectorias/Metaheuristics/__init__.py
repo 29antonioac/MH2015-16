@@ -107,38 +107,43 @@ def SA(data_train, target_train, classifier):
     max_neighbors = 10 * rowsize
     max_accepted = 0.1 * max_neighbors
     M = np.ceil(MAX_EVALUATIONS / max_neighbors)
+    beta = (T0 - Tf) / (M * T0 * Tf)
 
     T = T0
     evaluations = 0
-    actual_neighbors = 0
-    accepted_neighbors = 0
+    accepted_neighbors = 1
+    # max_eval = MAX_EVALUATIONS
 
-    while T >= Tf and evaluations < MAX_EVALUATIONS:
-        while evaluations < MAX_EVALUATIONS and actual_neighbors < max_neighbors and accepted_neighbors < max_accepted:
+    max_eval = 5000
+
+    while T >= Tf and evaluations < max_eval and accepted_neighbors != 0:
+        accepted_neighbors = 0
+        for actual_neighbors in range(max_neighbors):
+            if accepted_neighbors >= max_accepted:
+                break
+        # while evaluations < MAX_EVALUATIONS and actual_neighbors < max_neighbors and accepted_neighbors < max_accepted:
             feature = np.random.randint(rowsize)
             flip(selected_features, feature)
-
-            # Check if there isn't any feature
-            while sum(selected_features) == 0:
-                feature = np.random.randint(rowsize)
-                flip(selected_features, feature)
-
             new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
-            flip(selected_features, feature)
-            deltaF = new_score - actual_score
+            # flip(selected_features, feature)
+
+            # deltaF = new_score - actual_score
+            deltaF = actual_score - new_score
 
             evaluations += 1
             actual_neighbors += 1
-            if (deltaF != 0) and (deltaF > 0 or np.random.uniform() < np.exp(deltaF/T)):
+            if (deltaF != 0) and (deltaF < 0 or np.random.uniform() < np.exp(-deltaF/T)):
                 accepted_neighbors += 1
                 actual_score = new_score
-                flip(selected_features, feature)
+                # flip(selected_features, feature)
                 if actual_score > best_score:
                     best_score = new_score
                     best_solution = np.copy(selected_features)
+            else:
+                flip(selected_features, feature)
 
-        beta = (T0 - Tf) / (M * T0 * Tf)
         T = T / (1 + beta * T)
+        print("T =",T, "eval =", evaluations)
 
     return best_solution, best_score
 
@@ -244,12 +249,10 @@ def TSext(data_train, target_train, classifier):
             change_size = np.random.uniform()
             if change_size < 0.5:
                 size_tabu_list *= 1.5
-                size_tabu_list = np.ceil(size_tabu_list)
-                tabu_list.resize(size_tabu_list)
             else:
                 size_tabu_list /= 1.5
-                size_tabu_list = np.ceil(size_tabu_list)
-                tabu_list.resize(size_tabu_list)
+            size_tabu_list = np.ceil(size_tabu_list)
+            tabu_list = np.zeros(size_tabu_list, dtype=np.int32)
 
         neighbourhood = np.random.choice(rowsize, size_neighbourhood, replace = False)
 
