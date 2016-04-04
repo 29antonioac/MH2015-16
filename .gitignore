@@ -60,3 +60,18 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# Latex
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+*.fdb_latexmk
+*.synctex.gz

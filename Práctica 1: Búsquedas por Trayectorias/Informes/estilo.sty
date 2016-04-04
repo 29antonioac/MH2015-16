@@ -1,0 +1,108 @@
+\ProvidesPackage{estilo}
+
+%Comandos para configurar el idioma
+\usepackage[spanish,activeacute]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc} %Necesario para el uso de las comillas latinas.
+\usepackage{geometry} % Used to adjust the document margins
+
+%Package for options management
+\RequirePackage{kvoptions}
+\DeclareStringOption[MetaHeuristicas]{titulo}
+\ProcessKeyvalOptions*
+
+%Importante que esta sea la última órden del preámbulo
+\usepackage{hyperref}
+   \hypersetup{
+     pdftitle=\estilo@titulo,
+     pdfauthor={Antonio Álvarez Caballero},
+     unicode,
+     breaklinks=true,  % so long urls are correctly broken across lines
+     colorlinks=true,
+     urlcolor=blue,
+     linkcolor=darkorange,
+     citecolor=darkgreen
+     }
+
+
+% Slightly bigger margins than the latex defaults
+\geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+
+\newcommand\fnurl[2]{%
+  \href{#2}{#1}\footnote{\url{#2}}%
+}
+
+
+%Paquetes matemáticos
+\usepackage{amsmath,amsfonts,amsthm}
+\usepackage[all]{xy} %Para diagramas
+\usepackage{enumerate} %Personalización de enumeraciones
+\usepackage{tikz} %Dibujos
+\usepackage{ dsfont }
+
+%Tipografía escalable
+\usepackage{lmodern}
+%Legibilidad
+\usepackage{microtype}
+
+%Código
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\title{\estilo@titulo}
+\author{Antonio Álvarez Caballero\\
+    \href{mailto:analca3@correo.ugr.es}{analca3@correo.ugr.es}}
+\date{\today}
+
+\theoremstyle{definition}
+\newtheorem{ejercicio}{Ejercicio}
+\newtheorem{cuestion}{Cuestión}
+\newtheorem*{solucion}{Solución}
+\newtheorem*{bonus}{BONUS}
+
+
+
+%%%%%%%% New sqrt
+\usepackage{letltxmacro}
+\makeatletter
+\let\oldr@@t\r@@t
+\def\r@@t#1#2{%
+\setbox0=\hbox{$\oldr@@t#1{#2\,}$}\dimen0=\ht0
+\advance\dimen0-0.2\ht0
+\setbox2=\hbox{\vrule height\ht0 depth -\dimen0}%
+{\box0\lower0.4pt\box2}}
+\LetLtxMacro{\oldsqrt}{\sqrt}
+\renewcommand*{\sqrt}[2][\ ]{\oldsqrt[#1]{#2} }
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%% Norm
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%% Ceil
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

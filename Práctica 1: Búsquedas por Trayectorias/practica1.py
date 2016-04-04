@@ -28,16 +28,10 @@ def main(algorithm):
     algorithms_table = {}
     alg = arg_algorithms[algorithm]
 
-    databases = {   "W" : "Data/wdbc.arff",
-                    "M" : "Data/movement_libras.arff",
-                    "A" : "Data/arrhythmia.arff"}
-
-    databases = OrderedDict(sorted(databases.items(), key=lambda t: t[0]))
-    databases = OrderedDict(reversed(databases.items()))
+    databases = OrderedDict([('W', 'Data/wdbc.arff'), ('M', 'Data/movement_libras.arff'), ('A', 'Data/arrhythmia.arff')])
 
     print(databases)
-
-    # databases = { "W" : "Data/wdbc.arff" }
+    np.set_printoptions(precision=5)
 
     for key, value in databases.items():
         np.random.seed(12345678)
@@ -55,7 +49,7 @@ def main(algorithm):
         target = np.asarray(target.tolist(), dtype=np.int16)
 
         knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = 1)
-        repeats = 5
+        repeats = 1
         n_folds = 2
 
         for iteration in range(repeats):
@@ -76,13 +70,13 @@ def main(algorithm):
                 end = time()
 
                 knn.fit(data_train[:,selected_features], target_train)
-                score_out = knn.score(data_test[:,selected_features], target_test)
+                score_out = 100*knn.score(data_test[:,selected_features], target_test)
 
                 item["name"] = "Partición " + str(iteration+1) + "-" + str(run+1)
-                item[key+"_clas_in"] = score
-                item[key+"_clas_out"] = score_out
-                item[key+"_red"] = 100*(len(selected_features) - sum(selected_features)) / len(selected_features)
-                item[key+"_T"] = end-start
+                item[key+"_clas_in"] = float("{:,.5f}".format(score))
+                item[key+"_clas_out"] = float("{:,.5f}".format(score_out))
+                item[key+"_red"] = float("{:,.5f}".format( 100*(len(selected_features) - sum(selected_features)) / len(selected_features) ))
+                item[key+"_T"] = float("{:,.5f}".format(end-start))
 
                 logger.info(key + " - " + str(alg.__name__) + " - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Score out: " + str(score_out) + " Selected features: " + str(sum(selected_features)))
 
@@ -117,6 +111,7 @@ def main(algorithm):
         A_clas_out += it["A_clas_out"]
         A_red += it["A_red"]
         A_T += it["A_T"]
+
     W_clas_in /= repeats*n_folds
     W_clas_out /= repeats*n_folds
     W_red /= repeats*n_folds
@@ -134,28 +129,28 @@ def main(algorithm):
 
     algorithms_table[alg.__name__]["items"].append({
         "name" : "Media",
-        "W_clas_in" : W_clas_in,
-        "W_clas_out" : W_clas_out,
-        "W_red" : W_red,
-        "W_T" : W_T,
-        "M_clas_in" : M_clas_in,
-        "M_clas_out" : M_clas_out,
-        "M_red" : M_red,
-        "M_T" : M_T,
-        "A_clas_in" : A_clas_in,
-        "A_clas_out" : A_clas_out,
-        "A_red" : A_red,
-        "A_T" : A_T
+        "W_clas_in" : "{:,.5f}".format(W_clas_in),
+        "W_clas_out" : "{:,.5f}".format(W_clas_out),
+        "W_red" : "{:,.5f}".format(W_red),
+        "W_T" : "{:,.5f}".format(W_T),
+        "M_clas_in" : "{:,.5f}".format(M_clas_in),
+        "M_clas_out" : "{:,.5f}".format(M_clas_out),
+        "M_red" : "{:,.5f}".format(M_red),
+        "M_T" : "{:,.5f}".format(M_T),
+        "A_clas_in" : "{:,.5f}".format(A_clas_in),
+        "A_clas_out" : "{:,.5f}".format(A_clas_out),
+        "A_red" : "{:,.5f}".format(A_red),
+        "A_T" : "{:,.5f}".format(A_T)
     })
 
 
     with open("Other/template.mu", "r") as template:
-            with open("Other/"+alg.__name__+"-result.mu", "w") as dest:
+            with open("Informes/Tables/"+alg.__name__+"-result.tex", "w") as dest:
                 dest.write(pystache.render(template.read(), algorithms_table[alg.__name__]))
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         main(sys.argv[1])
-    if len(sys.argv) > 2:
+    elif len(sys.argv) > 2:
         p = multiprocessing.Pool(min(len(sys.argv) - 1,multiprocessing.cpu_count()))
         p.map(main, sys.argv[1:])
     else:

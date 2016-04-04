@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from time import time
 import numpy as np
 from sklearn import neighbors
 from sklearn import cross_validation
@@ -20,7 +20,7 @@ def score_solution(data_train, target_train, selected_features, scores, classifi
         y_train, y_test = target_train[train_index], target_train[test_index]
         classifier.fit(X_train[:, selected_features], y_train)
         scores[idx] = classifier.score(X_test[:, selected_features], y_test)
-    return np.mean(scores)
+    return 100*np.mean(scores)
 
 def SFS(data_train, target_train, classifier):
     rowsize = len(data_train[0])
@@ -112,38 +112,40 @@ def SA(data_train, target_train, classifier):
     T = T0
     evaluations = 0
     accepted_neighbors = 1
-    # max_eval = MAX_EVALUATIONS
+    max_eval = MAX_EVALUATIONS
 
-    max_eval = 5000
+    # max_eval = 5000
 
     while T >= Tf and evaluations < max_eval and accepted_neighbors != 0:
         accepted_neighbors = 0
         for actual_neighbors in range(max_neighbors):
             if accepted_neighbors >= max_accepted:
                 break
-        # while evaluations < MAX_EVALUATIONS and actual_neighbors < max_neighbors and accepted_neighbors < max_accepted:
             feature = np.random.randint(rowsize)
             flip(selected_features, feature)
             new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
-            # flip(selected_features, feature)
 
-            # deltaF = new_score - actual_score
             deltaF = actual_score - new_score
 
             evaluations += 1
-            actual_neighbors += 1
-            if (deltaF != 0) and (deltaF < 0 or np.random.uniform() < np.exp(-deltaF/T)):
+
+            unif = np.random.uniform()
+            coc = -deltaF/T
+            ex = np.exp(coc)
+            # print("deltaF=",deltaF, "T=",T,"coc=",coc, "unif=",unif, "expo=",ex, "delta!=0 = ",deltaF != 0)
+
+            if (deltaF != 0) and (deltaF < 0 or unif < ex ):
                 accepted_neighbors += 1
                 actual_score = new_score
-                # flip(selected_features, feature)
                 if actual_score > best_score:
                     best_score = new_score
-                    best_solution = np.copy(selected_features)
+                    np.copyto(best_solution, selected_features)
             else:
                 flip(selected_features, feature)
 
         T = T / (1 + beta * T)
-        print("T =",T, "eval =", evaluations)
+        # print("T =",T, "eval =", evaluations, "tiempo =", time())
+        # print("Best_sol =", best_score, "accepted_neighbors =", accepted_neighbors)
 
     return best_solution, best_score
 
