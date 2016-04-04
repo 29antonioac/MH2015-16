@@ -33,9 +33,9 @@ def SFS(data_train, target_train, classifier):
     while best_feature is not None:
         best_feature = None
 
-        for data_idx in range(rowsize):
-            if selected_features[data_idx]:
-                continue
+        available_features = np.where(selected_features == False)
+
+        for data_idx in available_features[0]:
 
             selected_features[data_idx] = True
             score = score_solution(data_train, target_train, selected_features, scores, classifier)

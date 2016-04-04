@@ -89,16 +89,22 @@
     Una vez ejecutado, irán saliendo por pantalla mensajes de este tipo, que proporcionan datos en tiempo real del estado de la ejecución:
 
     \begin{verbatim}
-      INFO:__main__:W - TS - Time elapsed: 2265.526112794876. Score: 98.2394337654. Score out: 95.0877192982 Selected features: 15
+      INFO:__main__:W - TS - Time elapsed: 2265.526112794876.
+      Score: 98.2394337654. Score out: 95.0877192982 Selected features: 15
     \end{verbatim}
 
     Este mensaje nos dice todo lo necesario: W es la base de datos (Wdbc), TS el algoritmo, el tiempo transcurrido para esta iteración (recordemos que hay 10), el score de entrenamiento, el score de validación y las características seleccionadas.
   \section{Experimentos}
+    Como se ha comentado antes, la semilla está fija a 12345678 para no tener problemas de aleatoriedad. El número de evaluaciones máxima de todos los algoritmos es de 15000. Por lo demás, todos los demás parámetros propios de cada algoritmo están tal y como se explica en el guión ($\phi=\mu=0.3$, los valores de vecinos máximos, soluciones máximas aceptadas, etc). \\
 
-    Búsqueda Local\\
-    \input{Tables/LS-result.tex}
-    SFS\\
+    \centerline{SFS}
     \input{Tables/SFS-result.tex}
+    \\ \centerline{Búsqueda Local}
+    \input{Tables/LS-result.tex}\\
+    \\ \centerline{SA}
+    \input{Tables/SA-result.tex}
+
+    El caso de la búsqueda tabú extendida no lo tengo completo: Por alguna razón, en la 5º ejecución del algoritmo en la base de datos \emph{Arrhythmia} la ejecución me ofrecía un \emph{Memory Error}, después de más de 12 horas ejecutando.
 
   \section{Referencias}
 
