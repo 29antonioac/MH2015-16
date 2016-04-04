@@ -77,7 +77,7 @@ def main(algorithm):
                 item[key+"_clas_in"] = float("{:,.5f}".format(score))
                 item[key+"_clas_out"] = float("{:,.5f}".format(score_out))
                 item[key+"_red"] = float("{:,.5f}".format( 100*(len(selected_features) - sum(selected_features)) / len(selected_features) ))
-                item[key+"_T"] = float("{:,.5f}".format(end-start))
+                item[key+"_T"] = float("{:,.5f}".format(end-start).replace(',',''))
 
                 logger.info(key + " - " + str(alg.__name__) + " - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Score out: " + str(score_out) + " Selected features: " + str(sum(selected_features)))
 
@@ -133,15 +133,15 @@ def main(algorithm):
         "W_clas_in" : "{:,.5f}".format(W_clas_in),
         "W_clas_out" : "{:,.5f}".format(W_clas_out),
         "W_red" : "{:,.5f}".format(W_red),
-        "W_T" : "{:,.5f}".format(W_T),
+        "W_T" : "{:,.5f}".format(W_T).replace(',',''),
         "M_clas_in" : "{:,.5f}".format(M_clas_in),
         "M_clas_out" : "{:,.5f}".format(M_clas_out),
         "M_red" : "{:,.5f}".format(M_red),
-        "M_T" : "{:,.5f}".format(M_T),
+        "M_T" : "{:,.5f}".format(M_T).replace(',',''),
         "A_clas_in" : "{:,.5f}".format(A_clas_in),
         "A_clas_out" : "{:,.5f}".format(A_clas_out),
         "A_red" : "{:,.5f}".format(A_red),
-        "A_T" : "{:,.5f}".format(A_T)
+        "A_T" : "{:,.5f}".format(A_T).replace(',','')
     })
 
 

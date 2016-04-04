@@ -34,9 +34,65 @@
   \section{Descripción de la estructura del método de búsqueda}
 
   \section{Descripción del algoritmo de comparación}
+    El algoritmo de comparación es un algoritmo greedy: el \emph{Sequential Forward Selection(SFS)}. La idea es muy simple: se parte del conjunto vacío de características (todos los bits a 0) y se recorren todas las características, evaluando la función de coste. La característica que más mejora ofrezca, se coje. Y se vuelve a empezar. Así hasta que ninguna de las características mejore el coste.
 
+    \begin{verbatim}
+      caracteristicas = (1,2,...,n)
+      caracteristicas_seleccionadas = (0,0,...,0,0)
+      fin = falso
+      mejor_caracteristica = 0
+
+
+      Mientras mejor_caracteristica != -1
+        mejor_tasa = 0
+        mejor_caracteristica = -1
+        Para cada característica
+          tasa = coste(característica)
+          Si tasa > mejor_tasa
+            mejor_tasa = tasa
+            mejor_caracteristica = caracteristica
+        Si mejor_caracteristica != -1
+          caracteristicas_seleccionadas.añadir(mejor_caracteristica)
+    \end{verbatim}
   \section{Desarrollo de la práctica}
+    La práctica se ha desarrollado usando el lenguage de programación \emph{Python}, ya que su velocidad de desarrollo es bastante alta. Para intentar lidiar con la lentitud que puede suponer usar un lenguaje interpretado, utilizaremos las librerías \emph{NumPy, SciPy y Scikit-Learn}, que tienen módulos implementados en C (sobre todo \emph{NumPy}) y agilizan bastante los cálculos y el manejo de vectores grandes.
 
+    Usaremos alguna funcionalidad directa de estas bibliotecas:
+    \begin{itemize}
+      \item \emph{NumPy}: Generación de números aleatorios y operaciones rápidas sobre vectores.
+      \item \emph{SciPy}: Lectura de ficheros ARFF de WEKA.
+      \item \emph{Scikit-Learn}: Particionamiento de los datos, tanto las particiones estratificadas de la validación cruzada 5x2 como las de \emph{Leave One Out} para calcular la función de coste. También se ha tomado un clasificador KNN, ya que está implementado usando estructuras de datos complejas como \emph{Ball Tree} y lo hace muy rápido.
+    \end{itemize}
+
+    Los requisitos para ejecutar mis prácticas son \emph{Python3} (importante que sea la 3), \emph{NumPy}, \emph{SciPy} y \emph{Scikit-Learn}. En mi plataforma (Archlinux) están disponibles desde su gestor de paquetes.
+
+    Una vez instalados los paquetes, sólo hay que ejecutar la práctica diciéndole al programa los algoritmos que queremos ejecutar. La semilla aleatoria está fijada dentro del código como 12345678 para no inducir a errores. Veamos algunos ejemplos de llamadas a la práctica. Primero notamos que los algoritmos disponibles son:
+
+    \begin{itemize}
+      \item -SFS: Ejecuta el algoritmo greedy SFS.
+      \item -LS: Ejecuta la Local Search.
+      \item -SA: Ejecuta el Simulated Annealing.
+      \item -TS: Ejecuta la Tabu Search.
+      \item -TSext: Ejecuta la Tabu Search extendida.
+    \end{itemize}
+
+    \begin{verbatim}
+      $ python practica1.py -TS
+    \end{verbatim}
+    Se ejecutará la Tabu Search. Pero no sólo se limita el programa a un algoritmo. Si le pasamos varios, los ejecutará en paralelo con el criterio de ejecutar tantos procesos como el mínimo entre los algoritmos pasados por argumento y el número de CPU's del sistema. Así, cada algoritmo podrá ir a una CPU distinta sin interferir en el rendimiento de ninguno de ellos.
+
+    \begin{verbatim}
+      $ python practica1.py -SFS -LS -SA
+    \end{verbatim}
+    Se ejecutarán en paralelo SFS, LS y SA paralelamente. Si se tuvieran dos núcleos, se ejecutarían los dos primeros y el tercero esperaría, para así no lastrar el rendimiento de ambos.
+
+    Una vez ejecutado, irán saliendo por pantalla mensajes de este tipo, que proporcionan datos en tiempo real del estado de la ejecución:
+
+    \begin{verbatim}
+      INFO:__main__:W - TS - Time elapsed: 2265.526112794876. Score: 98.2394337654. Score out: 95.0877192982 Selected features: 15
+    \end{verbatim}
+
+    Este mensaje nos dice todo lo necesario: W es la base de datos (Wdbc), TS el algoritmo, el tiempo transcurrido para esta iteración (recordemos que hay 10), el score de entrenamiento, el score de validación y las características seleccionadas.
   \section{Experimentos}
 
     Búsqueda Local\\
