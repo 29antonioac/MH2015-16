@@ -1,13 +1,49 @@
 \documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{kvoptions-patch}
 \usepackage[titulo={Práctica 1: Búsquedas con trayectorias simples}]{estilo}
 
 
 
- \begin{document}
-   \maketitle
+\begin{document}
+  \maketitle
+  \tableofcontents
+  \newpage
 
-    \input{Tables/LS-result0.mu}
+  \section{Descripción del problema}
 
+    \input{description.tex}
 
+  \section{Descripción de aplicación de los algoritmos al problema}
+    Los elementos comunes de los algoritmos son:
+    \begin{itemize}
+      \item Representación de las soluciones: Se representan las soluciones como vectores 1-dimensionales binarios (los llamaremos \emph{bits} para poder hacer uso de términos como \emph{darle la vuelta a un bit}):
 
- \end{document}
+      $$ s = (x_1,x_2,\ldots,x_{n-1},x_n) ; \; x_i \in \{True,False\} \; \forall i \in \{1,2,\ldots,n\} $$
+      \item Función objetivo: La función a maximizar es la tasa de clasificación de los datos de entrada:
+
+      $$ tasa\_clas = 100 \cdot \frac{instancias\;bien\;clasificadas}{instancias\;totales} $$
+
+      \item Generación de vecino: La función generadora de vecinos es bien simple. Se toma una solución y se le da la vuelta a uno de sus bits, el cual se escoge aleatoriamente.
+      \begin{verbatim}
+        Tomar una solución
+        indice = generarAleatorio(0, numero_caracteristicas)
+        caracteristicas[indice] = not caracteristicas[indice]
+      \end{verbatim}
+    \end{itemize}
+  \section{Descripción de la estructura del método de búsqueda}
+
+  \section{Descripción del algoritmo de comparación}
+
+  \section{Desarrollo de la práctica}
+
+  \section{Experimentos}
+
+    Búsqueda Local\\
+    \input{Tables/LS-result.tex}
+    SFS\\
+    \input{Tables/SFS-result.tex}
+
+  \section{Referencias}
+
+\end{document}

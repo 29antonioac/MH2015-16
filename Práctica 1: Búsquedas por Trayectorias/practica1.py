@@ -25,8 +25,10 @@ def main(algorithm):
     logger = logging.getLogger(__name__)
 
     arg_algorithms = {"-SFS" : SFS, "-LS" : LS, "-SA" : SA, "-TS" : TS, "-TSext" : TSext}
-    algorithms_table = {}
+    algorithm_table = {}
     alg = arg_algorithms[algorithm]
+
+    algorithm_table["algorithm"] = alg.__name__
 
     databases = OrderedDict([('W', 'Data/wdbc.arff'), ('M', 'Data/movement_libras.arff'), ('A', 'Data/arrhythmia.arff')])
 
@@ -49,7 +51,7 @@ def main(algorithm):
         target = np.asarray(target.tolist(), dtype=np.int16)
 
         knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = 1)
-        repeats = 1
+        repeats = 5
         n_folds = 2
 
         for iteration in range(repeats):
@@ -61,8 +63,7 @@ def main(algorithm):
                 data_train, data_test = data[train_index], data[test_index]
                 target_train, target_test = target[train_index], target[test_index]
 
-                actual_table = algorithms_table.setdefault(alg.__name__, {})
-                actual_items = actual_table.setdefault("items", [{} for _ in range(repeats*n_folds)])
+                actual_items = algorithm_table.setdefault("items", [{} for _ in range(repeats*n_folds)])
                 item = actual_items[2*iteration + run]
 
                 start = time()
@@ -96,7 +97,7 @@ def main(algorithm):
     A_T = 0
 
 
-    for it in algorithms_table[alg.__name__]["items"]:
+    for it in algorithm_table["items"]:
         W_clas_in += it["W_clas_in"]
         W_clas_out += it["W_clas_out"]
         W_red += it["W_red"]
@@ -127,7 +128,7 @@ def main(algorithm):
     A_red /= repeats*n_folds
     A_T /= repeats*n_folds
 
-    algorithms_table[alg.__name__]["items"].append({
+    algorithm_table["items"].append({
         "name" : "Media",
         "W_clas_in" : "{:,.5f}".format(W_clas_in),
         "W_clas_out" : "{:,.5f}".format(W_clas_out),
@@ -146,7 +147,7 @@ def main(algorithm):
 
     with open("Other/template.mu", "r") as template:
             with open("Informes/Tables/"+alg.__name__+"-result.tex", "w") as dest:
-                dest.write(pystache.render(template.read(), algorithms_table[alg.__name__]))
+                dest.write(pystache.render(template.read(), algorithm_table))
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         main(sys.argv[1])
