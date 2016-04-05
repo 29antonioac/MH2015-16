@@ -237,7 +237,6 @@ def TSext(data_train, target_train, classifier):
         best_feature = -1
 
         if iterations_without_improve >= 10:
-            # print("Reset!")
             iterations_without_improve = 0
             choice = np.random.uniform()
             if choice < 0.25: # New random solution

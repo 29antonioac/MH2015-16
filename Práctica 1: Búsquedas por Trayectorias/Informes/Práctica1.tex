@@ -142,25 +142,62 @@
         fin = Falso
         mejor_tasa = coste(caracteristicas)
         evaluaciones = 0
+        mejor_solucion = caracteristicas
+        tasa_actual = mejor_tasa
+        iteraciones_sin_mejora = 0
 
-        Mientras no fin && evaluaciones < MAXIMO_EVALUACIONES
-          lista_vecinos = aleatoriza(caracteristicas)
-          Para cada caracteristica de lista_vecinos
-            Si está activa
-              Continuar
+        Inicializar valores de lista tabú y demás parámetros
+
+        Mientras evaluaciones < MAXIMO_EVALUACIONES
+          tasa_actual = 0
+          mejor_caracteristica = -1
+
+          if iteraciones_sin_mejora >= 10:
+            iteraciones_sin_mejora = 0
+            eleccion = generaAleatorio()
+            Si eleccion < 0.25
+              caracteristicas = generaSolAleatoria()
+            Si eleccion < 0.5
+              caracteristicas = mejor_solucion
+            Si no
+              total_sols = sum(frec)
+              caracteristicas = generaVectorFrecuencias()
+
+            eleccion = generaAleatorio()
+            Si eleccion < 0.5
+              tamaño_lista_tabu *= 1.5
+            Si no
+              tamaño_lista_tabu /= 1.5
+            tamaño_lista_tabu = parteEnteraPorEncima(tamaño_lista_tabu)
+            tabu_list = lista(-1,tamaño_lista_tabu)
+
+          vecindario = generaAleatorio(tamaño_vecindario)
+
+          Para cada vecino en vecindario
+            flip(caracteristicas, vecino)
+            nueva_tasa = coste(caracteristicas)
+            flip(caracteristicas, vecino)
+
+            evaluaciones++
+
+            Si vecino está en lista_tabú
+              Si nueva_tasa > mejor_tasa && nueva_tasa > tasa_actual
+                tasa_actual = nueva_tasa
+                mejor_caracteristica = vecino
+            Else Si nueva_tasa > tasa_actual
+              tasa_actual = nueva_tasa
+              mejor_caracteristica = vecino
+
             Si evaluaciones >= MAXIMO_EVALUACIONES
               Break
 
-            flip(caracteristicas, indice_caracteristica)
-            tasa = coste(caracteristicas)
-            flip(caracteristicas, indice_caracteristica)
+            posicion_lista_tabu = (posicion_lista_tabu + 1) % tamaño_lista_tabu
+            lista_tabu[posicion_lista_tabu] = mejor_caracteristica
 
-            si tasa > mejor_tasa:
-              mejor_tasa = tasa
-              flip(caracteristicas,indice_caracteristica)
-              Break
-          Si no he terminado debido a un Break:
-            fin = True
+            Si tasa_actual > mejor_tasa
+              mejor_tasa = tasa_actual
+              flip(caraceristicas, mejor_caracteristica)
+              mejor_solucion = caracteristicas
       \end{verbatim}
     \end{itemize}
   \section{Descripción del algoritmo de comparación}
