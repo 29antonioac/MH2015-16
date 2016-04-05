@@ -34,7 +34,118 @@
   \section{Descripción de la estructura del método de búsqueda}
     Veamos los esquemas de cada algoritmo en pseudocódigo:
     \begin{itemize}
-      \item Búsqueda Local: 
+      \item Búsqueda Local:
+        \begin{verbatim}
+          caracteristicas = generaSolAleatoria()
+          fin = Falso
+          mejor_tasa = coste(caracteristicas)
+          evaluaciones = 0
+
+          Mientras no fin && evaluaciones < MAXIMO_EVALUACIONES
+            lista_vecinos = aleatoriza(caracteristicas)
+            Para cada caracteristica de lista_vecinos
+              Si está activa
+                Continuar
+              Si evaluaciones >= MAXIMO_EVALUACIONES
+                Break
+
+              flip(caracteristicas, indice_caracteristica)
+              tasa = coste(caracteristicas)
+              flip(caracteristicas, indice_caracteristica)
+
+              si tasa > mejor_tasa:
+                mejor_tasa = tasa
+                flip(caracteristicas,indice_caracteristica)
+                Break
+            Si no he terminado debido a un Break:
+              fin = True
+        \end{verbatim}
+      \item Enfriamiento Simulado:
+      \begin{verbatim}
+        caracteristicas = generaSolAleatoria()
+        fin = Falso
+        mejor_tasa = coste(caracteristicas)
+        evaluaciones = 0
+        mejor_solucion = caracteristicas
+        tasa_actual = mejor_tasa
+
+        Inicializar valores de temperatura y demás parámetros
+
+        Mientras temperatura >= temperatura_final && evaluaciones < MAXIMO_EVALUACIONES && vecinos_aceptados != 0
+            vecinos_aceptados = 0
+            Para cada vecino en 0..max_vecinos
+              Si vecinos_aceptados >= max_aceptados
+                Break
+
+              caracteristica = aleatorio()
+              flip(caracteristicas, caracteristica)
+              nueva_tasa = coste(caracteristicas)
+
+              delta = tasa_actual - nueva_tasa
+
+              Si delta != 0 && (delta < 0 || aleatorio < exp(-delta/temperatura))
+                vecinos_aceptados++
+                tasa_actual = nueva_tasa
+                Si tasa_actual > mejor_tasa
+                  mejor_tasa = nueva_tasa
+                  mejor_solucion = caracteristicas
+              Si no
+                flip(caracteristicas, caracteristica)
+
+            temperatura = actualizar(temperatura)
+      \end{verbatim}
+      \item Búsqueda Tabú:
+      \begin{verbatim}
+        caracteristicas = generaSolAleatoria()
+        fin = Falso
+        mejor_tasa = coste(caracteristicas)
+        evaluaciones = 0
+
+        Mientras no fin && evaluaciones < MAXIMO_EVALUACIONES
+          lista_vecinos = aleatoriza(caracteristicas)
+          Para cada caracteristica de lista_vecinos
+            Si está activa
+              Continuar
+            Si evaluaciones >= MAXIMO_EVALUACIONES
+              Break
+
+            flip(caracteristicas, indice_caracteristica)
+            tasa = coste(caracteristicas)
+            flip(caracteristicas, indice_caracteristica)
+
+            si tasa > mejor_tasa:
+              mejor_tasa = tasa
+              flip(caracteristicas,indice_caracteristica)
+              Break
+          Si no he terminado debido a un Break:
+            fin = True
+      \end{verbatim}
+      \item Búsqueda Tabú extendida:
+      \begin{verbatim}
+        caracteristicas = generaSolAleatoria()
+        fin = Falso
+        mejor_tasa = coste(caracteristicas)
+        evaluaciones = 0
+
+        Mientras no fin && evaluaciones < MAXIMO_EVALUACIONES
+          lista_vecinos = aleatoriza(caracteristicas)
+          Para cada caracteristica de lista_vecinos
+            Si está activa
+              Continuar
+            Si evaluaciones >= MAXIMO_EVALUACIONES
+              Break
+
+            flip(caracteristicas, indice_caracteristica)
+            tasa = coste(caracteristicas)
+            flip(caracteristicas, indice_caracteristica)
+
+            si tasa > mejor_tasa:
+              mejor_tasa = tasa
+              flip(caracteristicas,indice_caracteristica)
+              Break
+          Si no he terminado debido a un Break:
+            fin = True
+      \end{verbatim}
     \end{itemize}
   \section{Descripción del algoritmo de comparación}
     El algoritmo de comparación es un algoritmo greedy: el \emph{Sequential Forward Selection(SFS)}. La idea es muy simple: se parte del conjunto vacío de características (todos los bits a 0) y se recorren todas las características, evaluando la función de coste. La característica que más mejora ofrezca, se coje. Y se vuelve a empezar. Así hasta que ninguna de las características mejore el coste.
