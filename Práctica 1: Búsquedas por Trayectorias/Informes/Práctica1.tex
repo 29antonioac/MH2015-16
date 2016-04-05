@@ -100,25 +100,41 @@
         fin = Falso
         mejor_tasa = coste(caracteristicas)
         evaluaciones = 0
+        mejor_solucion = caracteristicas
+        tasa_actual = mejor_tasa
 
-        Mientras no fin && evaluaciones < MAXIMO_EVALUACIONES
-          lista_vecinos = aleatoriza(caracteristicas)
-          Para cada caracteristica de lista_vecinos
-            Si está activa
-              Continuar
+        Inicializar valores de lista tabú y demás parámetros
+
+        Mientras evaluaciones < MAXIMO_EVALUACIONES
+          tasa_actual = 0
+          mejor_caracteristica = -1
+
+          vecindario = generaAleatorio(tamaño_vecindario)
+
+          Para cada vecino en vecindario
+            flip(caracteristicas, vecino)
+            nueva_tasa = coste(caracteristicas)
+            flip(caracteristicas, vecino)
+
+            evaluaciones++
+
+            Si vecino está en lista_tabú
+              Si nueva_tasa > mejor_tasa && nueva_tasa > tasa_actual
+                tasa_actual = nueva_tasa
+                mejor_caracteristica = vecino
+            Else Si nueva_tasa > tasa_actual
+              tasa_actual = nueva_tasa
+              mejor_caracteristica = vecino
+
             Si evaluaciones >= MAXIMO_EVALUACIONES
               Break
 
-            flip(caracteristicas, indice_caracteristica)
-            tasa = coste(caracteristicas)
-            flip(caracteristicas, indice_caracteristica)
+            posicion_lista_tabu = (posicion_lista_tabu + 1) % tamaño_lista_tabu
+            lista_tabu[posicion_lista_tabu] = mejor_caracteristica
 
-            si tasa > mejor_tasa:
-              mejor_tasa = tasa
-              flip(caracteristicas,indice_caracteristica)
-              Break
-          Si no he terminado debido a un Break:
-            fin = True
+            Si tasa_actual > mejor_tasa
+              mejor_tasa = tasa_actual
+              flip(caraceristicas, mejor_caracteristica)
       \end{verbatim}
       \item Búsqueda Tabú extendida:
       \begin{verbatim}

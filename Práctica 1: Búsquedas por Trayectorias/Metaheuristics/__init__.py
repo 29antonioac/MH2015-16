@@ -178,9 +178,9 @@ def TS(data_train, target_train, classifier):
         for idx in neighbourhood:
             flip(selected_features, idx)
             # Check if there isn't any feature
-            while sum(selected_features) == 0:
-                feature = np.random.randint(rowsize)
-                flip(selected_features, feature)
+            # while sum(selected_features) == 0:
+            #     feature = np.random.randint(rowsize)
+            #     flip(selected_features, feature)
 
             new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
             flip(selected_features, idx)
@@ -201,7 +201,7 @@ def TS(data_train, target_train, classifier):
         pos_tabu_list = (pos_tabu_list + 1) % size_tabu_list
         tabu_list[pos_tabu_list] = best_feature
 
-        if (actual_score > best_score):
+        if actual_score > best_score:
             best_score = actual_score
             flip(selected_features, best_feature)
 
