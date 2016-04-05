@@ -32,7 +32,10 @@
       \end{verbatim}
     \end{itemize}
   \section{Descripción de la estructura del método de búsqueda}
-
+    Veamos los esquemas de cada algoritmo en pseudocódigo:
+    \begin{itemize}
+      \item Búsqueda Local: 
+    \end{itemize}
   \section{Descripción del algoritmo de comparación}
     El algoritmo de comparación es un algoritmo greedy: el \emph{Sequential Forward Selection(SFS)}. La idea es muy simple: se parte del conjunto vacío de características (todos los bits a 0) y se recorren todas las características, evaluando la función de coste. La característica que más mejora ofrezca, se coje. Y se vuelve a empezar. Así hasta que ninguna de las características mejore el coste.
 
@@ -63,6 +66,8 @@
       \item \emph{SciPy}: Lectura de ficheros ARFF de WEKA.
       \item \emph{Scikit-Learn}: Particionamiento de los datos, tanto las particiones estratificadas de la validación cruzada 5x2 como las de \emph{Leave One Out} para calcular la función de coste. También se ha tomado un clasificador KNN, ya que está implementado usando estructuras de datos complejas como \emph{Ball Tree} y lo hace muy rápido.
     \end{itemize}
+
+    Esta elección se ha hecho para poder preocuparme sólo y exclusivamente de la implementación de las metaheurísticas.
 
     Los requisitos para ejecutar mis prácticas son \emph{Python3} (importante que sea la 3), \emph{NumPy}, \emph{SciPy} y \emph{Scikit-Learn}. En mi plataforma (Archlinux) están disponibles desde su gestor de paquetes.
 
@@ -107,5 +112,11 @@
     El caso de la búsqueda tabú extendida no lo tengo completo: Por alguna razón, en la 5º ejecución del algoritmo en la base de datos \emph{Arrhythmia} la ejecución me ofrecía un \emph{Memory Error}, después de más de 12 horas ejecutando.
 
   \section{Referencias}
+
+  Las referencias utilizadas han sido:
+  \begin{itemize}
+    \item \emph{Scikit-Learn}: La propia \fnurl{documentación}{http://scikit-learn.org/stable/modules/classes.html} de la biblioteca.
+    \item \emph{SciPy}: La propia \fnurl{documentación}{http://docs.scipy.org/doc/scipy/reference/} de la biblioteca.
+  \end{itemize}
 
 \end{document}

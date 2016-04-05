@@ -254,16 +254,16 @@ def TSext(data_train, target_train, classifier):
             else:
                 size_tabu_list /= 1.5
             size_tabu_list = np.ceil(size_tabu_list)
-            tabu_list = np.zeros(size_tabu_list, dtype=np.int32)
+            tabu_list = np.repeat(-1,size_tabu_list)
 
         neighbourhood = np.random.choice(rowsize, size_neighbourhood, replace = False)
 
         for idx in neighbourhood:
             flip(selected_features, idx)
             # Check if there isn't any feature
-            while sum(selected_features) == 0:
-                feature = np.random.randint(rowsize)
-                flip(selected_features, feature)
+            # while sum(selected_features) == 0:
+            #     feature = np.random.randint(rowsize)
+            #     flip(selected_features, feature)
 
             new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
             flip(selected_features, idx)
