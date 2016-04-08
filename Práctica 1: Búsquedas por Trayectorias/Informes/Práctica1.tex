@@ -34,7 +34,171 @@
   \section{Descripción de la estructura del método de búsqueda}
     Veamos los esquemas de cada algoritmo en pseudocódigo:
     \begin{itemize}
-      \item Búsqueda Local: 
+      \item Búsqueda Local:
+        \begin{verbatim}
+          caracteristicas = generaSolAleatoria()
+          fin = Falso
+          mejor_tasa = coste(caracteristicas)
+          evaluaciones = 0
+
+          Mientras no fin && evaluaciones < MAXIMO_EVALUACIONES
+            lista_vecinos = aleatoriza(caracteristicas)
+            Para cada caracteristica de lista_vecinos
+              Si está activa
+                Continuar
+              Si evaluaciones >= MAXIMO_EVALUACIONES
+                Break
+
+              flip(caracteristicas, indice_caracteristica)
+              tasa = coste(caracteristicas)
+              flip(caracteristicas, indice_caracteristica)
+
+              si tasa > mejor_tasa:
+                mejor_tasa = tasa
+                flip(caracteristicas,indice_caracteristica)
+                Break
+            Si no he terminado debido a un Break:
+              fin = True
+        \end{verbatim}
+      \item Enfriamiento Simulado:
+      \begin{verbatim}
+        caracteristicas = generaSolAleatoria()
+        fin = Falso
+        mejor_tasa = coste(caracteristicas)
+        evaluaciones = 0
+        mejor_solucion = caracteristicas
+        tasa_actual = mejor_tasa
+
+        Inicializar valores de temperatura y demás parámetros
+
+        Mientras temperatura >= temperatura_final && evaluaciones < MAXIMO_EVALUACIONES && vecinos_aceptados != 0
+            vecinos_aceptados = 0
+            Para cada vecino en 0..max_vecinos
+              Si vecinos_aceptados >= max_aceptados
+                Break
+
+              caracteristica = aleatorio()
+              flip(caracteristicas, caracteristica)
+              nueva_tasa = coste(caracteristicas)
+
+              delta = tasa_actual - nueva_tasa
+
+              Si delta != 0 && (delta < 0 || aleatorio < exp(-delta/temperatura))
+                vecinos_aceptados++
+                tasa_actual = nueva_tasa
+                Si tasa_actual > mejor_tasa
+                  mejor_tasa = nueva_tasa
+                  mejor_solucion = caracteristicas
+              Si no
+                flip(caracteristicas, caracteristica)
+
+            temperatura = actualizar(temperatura)
+      \end{verbatim}
+      \item Búsqueda Tabú:
+      \begin{verbatim}
+        caracteristicas = generaSolAleatoria()
+        fin = Falso
+        mejor_tasa = coste(caracteristicas)
+        evaluaciones = 0
+        mejor_solucion = caracteristicas
+        tasa_actual = mejor_tasa
+
+        Inicializar valores de lista tabú y demás parámetros
+
+        Mientras evaluaciones < MAXIMO_EVALUACIONES
+          tasa_actual = 0
+          mejor_caracteristica = -1
+
+          vecindario = generaAleatorio(tamaño_vecindario)
+
+          Para cada vecino en vecindario
+            flip(caracteristicas, vecino)
+            nueva_tasa = coste(caracteristicas)
+            flip(caracteristicas, vecino)
+
+            evaluaciones++
+
+            Si vecino está en lista_tabú
+              Si nueva_tasa > mejor_tasa && nueva_tasa > tasa_actual
+                tasa_actual = nueva_tasa
+                mejor_caracteristica = vecino
+            Else Si nueva_tasa > tasa_actual
+              tasa_actual = nueva_tasa
+              mejor_caracteristica = vecino
+
+            Si evaluaciones >= MAXIMO_EVALUACIONES
+              Break
+
+            posicion_lista_tabu = (posicion_lista_tabu + 1) % tamaño_lista_tabu
+            lista_tabu[posicion_lista_tabu] = mejor_caracteristica
+
+            Si tasa_actual > mejor_tasa
+              mejor_tasa = tasa_actual
+              flip(caraceristicas, mejor_caracteristica)
+      \end{verbatim}
+      \item Búsqueda Tabú extendida:
+      \begin{verbatim}
+        caracteristicas = generaSolAleatoria()
+        fin = Falso
+        mejor_tasa = coste(caracteristicas)
+        evaluaciones = 0
+        mejor_solucion = caracteristicas
+        tasa_actual = mejor_tasa
+        iteraciones_sin_mejora = 0
+
+        Inicializar valores de lista tabú y demás parámetros
+
+        Mientras evaluaciones < MAXIMO_EVALUACIONES
+          tasa_actual = 0
+          mejor_caracteristica = -1
+
+          if iteraciones_sin_mejora >= 10:
+            iteraciones_sin_mejora = 0
+            eleccion = generaAleatorio()
+            Si eleccion < 0.25
+              caracteristicas = generaSolAleatoria()
+            Si eleccion < 0.5
+              caracteristicas = mejor_solucion
+            Si no
+              total_sols = sum(frec)
+              caracteristicas = generaVectorFrecuencias()
+
+            eleccion = generaAleatorio()
+            Si eleccion < 0.5
+              tamaño_lista_tabu *= 1.5
+            Si no
+              tamaño_lista_tabu /= 1.5
+            tamaño_lista_tabu = parteEnteraPorEncima(tamaño_lista_tabu)
+            tabu_list = lista(-1,tamaño_lista_tabu)
+
+          vecindario = generaAleatorio(tamaño_vecindario)
+
+          Para cada vecino en vecindario
+            flip(caracteristicas, vecino)
+            nueva_tasa = coste(caracteristicas)
+            flip(caracteristicas, vecino)
+
+            evaluaciones++
+
+            Si vecino está en lista_tabú
+              Si nueva_tasa > mejor_tasa && nueva_tasa > tasa_actual
+                tasa_actual = nueva_tasa
+                mejor_caracteristica = vecino
+            Else Si nueva_tasa > tasa_actual
+              tasa_actual = nueva_tasa
+              mejor_caracteristica = vecino
+
+            Si evaluaciones >= MAXIMO_EVALUACIONES
+              Break
+
+            posicion_lista_tabu = (posicion_lista_tabu + 1) % tamaño_lista_tabu
+            lista_tabu[posicion_lista_tabu] = mejor_caracteristica
+
+            Si tasa_actual > mejor_tasa
+              mejor_tasa = tasa_actual
+              flip(caraceristicas, mejor_caracteristica)
+              mejor_solucion = caracteristicas
+      \end{verbatim}
     \end{itemize}
   \section{Descripción del algoritmo de comparación}
     El algoritmo de comparación es un algoritmo greedy: el \emph{Sequential Forward Selection(SFS)}. La idea es muy simple: se parte del conjunto vacío de características (todos los bits a 0) y se recorren todas las características, evaluando la función de coste. La característica que más mejora ofrezca, se coje. Y se vuelve a empezar. Así hasta que ninguna de las características mejore el coste.
@@ -104,10 +268,12 @@
 
     \centerline{SFS}
     \input{Tables/SFS-result.tex}
-    \\ \centerline{Búsqueda Local}
+    \\ \centerline{LS}
     \input{Tables/LS-result.tex}\\
     \\ \centerline{SA}
     \input{Tables/SA-result.tex}
+    \\ \centerline{TS}
+    \input{Tables/TS-result.tex} \\
 
     El caso de la búsqueda tabú extendida no lo tengo completo: Por alguna razón, en la 5º ejecución del algoritmo en la base de datos \emph{Arrhythmia} la ejecución me ofrecía un \emph{Memory Error}, después de más de 12 horas ejecutando.
 
