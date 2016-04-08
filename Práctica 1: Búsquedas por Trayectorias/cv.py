@@ -1,30 +1,27 @@
 #!/usr/bin/env python
 
 import numpy as np
-from sklearn.cross_validation import StratifiedKFold
-from sklearn.cross_validation import check_cv
-from sklearn.preprocessing import MinMaxScaler
+from sklearn import neighbors
+from time import time
+from sklearn import datasets
+import multiprocessing as mp
 
-np.random.seed(123456789)
+if __name__ == "__main__":
+    mp.set_start_method('forkserver', force = True)
+    np.random.seed(123456)
 
-X = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
-y = np.array([0, 0, 1, 1])
+    iris = datasets.load_iris()
 
-print(X)
-print(y)
-skf = StratifiedKFold(y, n_folds=2, shuffle=True)
-len(skf)
+    knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = 2)
 
-print(skf)
+    perm = np.random.permutation(iris.target.size)
+    iris.data = iris.data[perm]
+    iris.target = iris.target[perm]
+    knn.fit(iris.data[:100], iris.target[:100])
 
+    start = time()
+    score = knn.score(iris.data[100:], iris.target[100:])
+    end = time()
 
-for train_index, test_index in skf:
-   print("TRAIN:", train_index, "TEST:", test_index)
-   X_train, X_test = X[train_index], X[test_index]
-   y_train, y_test = y[train_index], y[test_index]
-   print("X_train:", X_train, "X_test:", X_test)
-   print("y_train:", y_train, "y_test:", y_test)
-
-m = MinMaxScaler()
-X = m.fit_transform(X)
-print(X)
+    print(score)
+    print(end-start)
