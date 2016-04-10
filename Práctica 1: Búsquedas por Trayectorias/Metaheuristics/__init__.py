@@ -46,8 +46,7 @@ def SFS(data_train, target_train, classifier):
 
             selected_features[data_idx] = True
             # score = score_solution(data_train, target_train, selected_features, scores, classifier)
-            score = classifier.scoreSolution(data_train[:, selected_features],
-                                                   target_train)
+            score = classifier.scoreSolution(data_train[:, selected_features], target_train)
             selected_features[data_idx] = False
 
             if score > best_score:
@@ -71,8 +70,7 @@ def LS(data_train, target_train, classifier):
 
     end = False
 
-    best_score = score = classifier.scoreSolution(data_train[:, selected_features],
-                                           target_train)
+    best_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
     evaluations = 0
     while not end and evaluations < MAX_EVALUATIONS:
         l_neighbors = list(enumerate(selected_features))
@@ -85,8 +83,7 @@ def LS(data_train, target_train, classifier):
 
             flip(selected_features, idx)
 
-            score = classifier.scoreSolution(data_train[:, selected_features],
-                                                   target_train)
+            score = classifier.scoreSolution(data_train[:, selected_features], target_train)
 
             # print(score)
 
@@ -310,3 +307,27 @@ def TSext(data_train, target_train, classifier):
             best_solution = np.copy(selected_features)
 
     return best_solution, best_score
+
+def BMB(data_train, target_train, classifier):
+    rowsize = len(data_train[0])
+    data_number = data_train.shape[0]
+
+    best_solution = np.zeros(rowsize, dtype=np.bool)
+    best_score = 0
+    num_searchs = 25
+
+    for _ in range(num_searchs):
+        selected_features, score = LS(data_train, target_train, classifier)
+
+        if score > best_score:
+            best_score = score
+            np.copyto(best_solution, selected_features)
+
+    return best_solution, best_score
+
+
+def GRASP(data_train, target_train, classifier):
+    pass
+
+def ILS(data_train, target_train, classifier):
+    pass
