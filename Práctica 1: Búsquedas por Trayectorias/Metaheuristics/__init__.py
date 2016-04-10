@@ -58,11 +58,12 @@ def SFS(data_train, target_train, classifier):
 
     return selected_features, best_score
 
-def LS(data_train, target_train, classifier):
+def LS(data_train, target_train, classifier, initial_sol = None):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
 
-    initial_sol = np.random.choice([True, False], rowsize)
+    if initial_sol is None:
+        initial_sol = np.random.choice([True, False], rowsize)
 
     scores = np.zeros(data_number, dtype=np.float32)
 
@@ -308,6 +309,55 @@ def TSext(data_train, target_train, classifier):
 
     return best_solution, best_score
 
+##### Excersise 2
+
+def SFSrandom(data_train, target_train, classifier):
+    rowsize = len(data_train[0])
+    data_number = data_train.shape[0]
+    selected_features = np.zeros(rowsize, dtype=np.bool)
+    best_tmp_score = 0
+    worst_tmp_score = 0
+    best_feature = 0
+    best_score = 0
+    alpha = 0.3
+    # scores = np.zeros(data_number, dtype=np.float32)
+
+    while best_feature is not None:
+        best_feature = None
+
+        available_features = np.where(selected_features == False)
+        score_features = np.zeros(available_features.shape[0])
+        restricted_features = []
+
+        for idx,data_idx in enumerate(available_features[0]):
+
+            selected_features[data_idx] = True
+            # score = score_solution(data_train, target_train, selected_features, scores, classifier)
+            score_features[idx] = classifier.scoreSolution(data_train[:, selected_features], target_train)
+            selected_features[data_idx] = False
+
+            if score > best_tmp_score:
+                best_tmp_score = score
+            elif score < worst_score:
+                worst_tmp_score = score
+
+        for idx,data_idx in enumerate(available_features[0]):
+            if score[idx] > best_tmp_score - alpha * (best_tmp_score - worst_tmp_score)
+                restricted_features.append(data_idx)
+
+        random_feature = np.random.choice(restricted_features)
+
+        selected_features[random_feature] = True
+        score = classifier.scoreSolution(data_train[:, selected_features], target_train)
+
+        if score > best_score:
+            best_score = score
+            best_feature = random_feature
+        else:
+            selected_features[random_feature] = False
+
+    return selected_features, best_score
+
 def BMB(data_train, target_train, classifier):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
@@ -327,7 +377,22 @@ def BMB(data_train, target_train, classifier):
 
 
 def GRASP(data_train, target_train, classifier):
-    pass
+        rowsize = len(data_train[0])
+        data_number = data_train.shape[0]
+
+        best_solution = np.zeros(rowsize, dtype=np.bool)
+        best_score = 0
+        num_searchs = 25
+
+        for _ in range(num_searchs):
+            selected_features, score = SFSrandom(data_train, target_train, classifier)
+            selected_features, score = LS(data_train, target_train, classifier, selected_features)
+
+            if score > best_score:
+                best_score = score
+                np.copyto(best_solution, selected_features)
+
+        return best_solution, best_score
 
 def ILS(data_train, target_train, classifier):
     pass
