@@ -45,7 +45,9 @@ def SFS(data_train, target_train, classifier):
         for data_idx in available_features[0]:
 
             selected_features[data_idx] = True
-            score = score_solution(data_train, target_train, selected_features, scores, classifier)
+            # score = score_solution(data_train, target_train, selected_features, scores, classifier)
+            score = classifier.scoreSolution(data_train[:, selected_features],
+                                                   target_train)
             selected_features[data_idx] = False
 
             if score > best_score:
@@ -69,7 +71,8 @@ def LS(data_train, target_train, classifier):
 
     end = False
 
-    best_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+    best_score = score = classifier.scoreSolution(data_train[:, selected_features],
+                                           target_train)
     evaluations = 0
     while not end and evaluations < MAX_EVALUATIONS:
         l_neighbors = list(enumerate(selected_features))
@@ -82,7 +85,10 @@ def LS(data_train, target_train, classifier):
 
             flip(selected_features, idx)
 
-            score = score_solution(data_train, target_train, selected_features, scores, classifier)
+            score = classifier.scoreSolution(data_train[:, selected_features],
+                                                   target_train)
+
+            print(score)
 
             flip(selected_features, idx)
 

@@ -14,7 +14,10 @@ from sklearn.preprocessing import MinMaxScaler
 
 from collections import OrderedDict
 from time import time
+from time import sleep
 from Metaheuristics import *
+
+from scoreSolutionGPU import knnLooGPU
 
 
 
@@ -50,6 +53,8 @@ def main(algorithm):
         target = np.asarray(target.tolist(), dtype=np.int16)
 
         knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = 1)
+        scorerGPU = knnLooGPU(data.shape[0], data.shape[1], 3)
+
         repeats = 5
         n_folds = 2
 
@@ -66,7 +71,7 @@ def main(algorithm):
                 item = actual_items[2*iteration + run]
 
                 start = time()
-                selected_features, score = alg(data_train, target_train, knn)
+                selected_features, score = alg(data_train, target_train, scorerGPU)
                 end = time()
 
                 knn.fit(data_train[:,selected_features], target_train)
@@ -79,7 +84,7 @@ def main(algorithm):
                 item[key+"_T"] = float("{:,.5f}".format(end-start).replace(',',''))
 
                 logger.info(key + " - " + str(alg.__name__) + " - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Score out: " + str(score_out) + " Selected features: " + str(sum(selected_features)))
-
+                sleep(5)
     W_clas_in = 0
     W_clas_out = 0
     W_red = 0
