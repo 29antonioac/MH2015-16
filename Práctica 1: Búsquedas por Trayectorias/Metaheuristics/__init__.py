@@ -395,4 +395,31 @@ def GRASP(data_train, target_train, classifier):
         return best_solution, best_score
 
 def ILS(data_train, target_train, classifier):
-    pass
+    def mutation(features):
+        changes = np.ceil(0.1 * len(features))
+        mask = np.repeat(True, changes)
+        unchanged = np.repeat(False, len(features) - changes)
+
+        full_mask = np.concatenate((mask,unchanged))
+        full_mask = np.random.shuffle(full_mask)
+
+        mutated_features = np.logical_xor(features,full_mask)
+        return mutated_features
+
+    rowsize = len(data_train[0])
+    data_number = data_train.shape[0]
+
+    initial_sol = np.random.choice([True, False], rowsize)
+    num_searchs = 25
+    best_score = 0
+
+    selected_features = LS(data_train, target_train, classifier, initial_sol)
+
+    for _ in range(num_searchs - 1):
+        new_selected_features, new_score = LS(data_train, target_train, classifier, mutation(selected_features))
+
+        if new_score > best_score:
+            best_score = new_score
+            np.copyto(best_solution, new_selected_features)
+
+    return best_solution, best_score
