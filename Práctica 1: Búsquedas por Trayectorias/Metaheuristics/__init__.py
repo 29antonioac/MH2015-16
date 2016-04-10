@@ -88,7 +88,7 @@ def LS(data_train, target_train, classifier):
             score = classifier.scoreSolution(data_train[:, selected_features],
                                                    target_train)
 
-            print(score)
+            # print(score)
 
             flip(selected_features, idx)
 
