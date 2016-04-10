@@ -342,7 +342,7 @@ def SFSrandom(data_train, target_train, classifier):
                 worst_tmp_score = score
 
         for idx,data_idx in enumerate(available_features[0]):
-            if score[idx] > best_tmp_score - alpha * (best_tmp_score - worst_tmp_score)
+            if score[idx] > best_tmp_score - alpha * (best_tmp_score - worst_tmp_score):
                 restricted_features.append(data_idx)
 
         random_feature = np.random.choice(restricted_features)
