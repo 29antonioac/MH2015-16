@@ -24,7 +24,7 @@ def main(algorithm):
 
     logger = logging.getLogger(__name__)
 
-    arg_algorithms = {"-SFS" : SFS, "-LS" : LS, "-SA" : SA, "-TS" : TS, "-TSext" : TSext}
+    arg_algorithms = {"-KNN" : KNN, "-SFS" : SFS, "-LS" : LS, "-SA" : SA, "-TS" : TS, "-TSext" : TSext}
     algorithm_table = {}
     alg = arg_algorithms[algorithm]
 
@@ -32,7 +32,6 @@ def main(algorithm):
 
     databases = OrderedDict([('W', 'Data/wdbc.arff'), ('M', 'Data/movement_libras.arff'), ('A', 'Data/arrhythmia.arff')])
 
-    print(databases)
     np.set_printoptions(precision=5)
 
     for key, value in databases.items():
@@ -156,4 +155,4 @@ if __name__ == "__main__":
         p.map(main, sys.argv[1:])
     else:
         print("Give me an algorithm")
-        print("-SFS, -LS, -SA, -TS, -TSext")
+        print("-KNN, -SFS, -LS, -SA, -TS, -TSext")

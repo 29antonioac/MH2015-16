@@ -222,6 +222,8 @@
           caracteristicas_seleccionadas.añadir(mejor_caracteristica)
     \end{verbatim}
   \section{Desarrollo de la práctica}
+    En primer lugar, comentar que las bases de datos han sido modificadas en su estructura (que no en sus datos) para que sean homogéneas. Así, se han puesto todas las clases como numéricas (en Wdbc no lo estaban) y se han colocado en la última columna.
+
     La práctica se ha desarrollado usando el lenguage de programación \emph{Python}, ya que su velocidad de desarrollo es bastante alta. Para intentar lidiar con la lentitud que puede suponer usar un lenguaje interpretado, utilizaremos las librerías \emph{NumPy, SciPy y Scikit-Learn}, que tienen módulos implementados en C (sobre todo \emph{NumPy}) y agilizan bastante los cálculos y el manejo de vectores grandes.
 
     Usaremos alguna funcionalidad directa de estas bibliotecas:
@@ -266,6 +268,10 @@
   \section{Experimentos}
     Como se ha comentado antes, la semilla está fija a 12345678 para no tener problemas de aleatoriedad. El número de evaluaciones máxima de todos los algoritmos es de 15000. Por lo demás, todos los demás parámetros propios de cada algoritmo están tal y como se explica en el guión ($\phi=\mu=0.3$, los valores de vecinos máximos, soluciones máximas aceptadas, etc). \\
 
+    \newpage
+
+    \centerline{KNN}
+    \input{Tables/KNN-result.tex}\\
     \centerline{SFS}
     \input{Tables/SFS-result.tex}
     \\ \centerline{LS}
@@ -274,8 +280,17 @@
     \input{Tables/SA-result.tex}
     \\ \centerline{TS}
     \input{Tables/TS-result.tex} \\
+    \newpage
+     \centerline{TSExt}
+    \input{Tables/TSExt-result.tex} \\
+    \\ \centerline{Media}
+    \input{Tables/Average-result.tex}\\
 
-    El caso de la búsqueda tabú extendida no lo tengo completo: Por alguna razón, en la 5º ejecución del algoritmo en la base de datos \emph{Arrhythmia} la ejecución me ofrecía un \emph{Memory Error}, después de más de 12 horas ejecutando.
+    Las conclusiones son claras: La búsqueda tabú es un gran algoritmo, pero en algunos casos se ve superado por otros más sencillos. Bien optimizada puede dar grandes resultados (aún tardando muchísimo más que los demás), pero si uno tiene poco tiempo para desarrollar un algoritmo de optimización, es más viable irse a un Simulated Annealing, por ejemplo, que ofrece resultados muy parecidos tardando muchísimo menos. En algunos casos la simple búsqueda local es bastante efectiva.
+
+    La búsqueda tabú extendida es una buena opción sobre la normal: con un poco más de tiempo se consigue mejorar un poco los resultados. Si nos decantamos por una tabú, debería tener memoria a largo plazo, ya que tarda tanto, que al menos optimice lo máximo.
+
+
 
   \section{Referencias}
 

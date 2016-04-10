@@ -22,6 +22,13 @@ def score_solution(data_train, target_train, selected_features, scores, classifi
         scores[idx] = classifier.score(X_test[:, selected_features], y_test)
     return 100*np.mean(scores)
 
+def KNN(data_train, target_train, classifier):
+    selected_features = np.repeat(True, len(data_train[0]))
+    scores = np.zeros(data_train.shape[0], dtype=np.float32)
+    score = score_solution(data_train, target_train, selected_features, scores, classifier)
+    return selected_features, score
+
+
 def SFS(data_train, target_train, classifier):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
@@ -251,8 +258,9 @@ def TSext(data_train, target_train, classifier):
             if change_size < 0.5:
                 size_tabu_list *= 1.5
             else:
-                size_tabu_list /= 1.5
+                size_tabu_list *= 0.5
             size_tabu_list = np.ceil(size_tabu_list)
+            # print(size_tabu_list)
             tabu_list = np.repeat(-1,size_tabu_list)
 
         neighbourhood = np.random.choice(rowsize, size_neighbourhood, replace = False)
