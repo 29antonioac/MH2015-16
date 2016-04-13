@@ -52,7 +52,7 @@ def main(algorithm):
         data = m.fit_transform(data)            # Normalize data
 
         target = dataset[:]["class"]            # Only the class column
-        target = np.asarray(target.tolist(), dtype=np.int16)
+        target = np.asarray(target.tolist(), dtype=np.int32)
 
         knn = neighbors.KNeighborsClassifier(n_neighbors = 3, n_jobs = 1)
 
@@ -87,7 +87,7 @@ def main(algorithm):
                 item[key+"_T"] = float("{:,.5f}".format(end-start).replace(',',''))
 
                 logger.info(key + " - " + str(alg.__name__) + " - Time elapsed: " + str(end-start) + ". Score: " + str(score) + ". Score out: " + str(score_out) + " Selected features: " + str(sum(selected_features)))
-                sleep(5)
+                # sleep(5)
     W_clas_in = 0
     W_clas_out = 0
     W_red = 0
