@@ -3,6 +3,7 @@
 
 import sys
 import logging
+import random
 
 import pystache
 import numpy as np
@@ -17,7 +18,7 @@ from time import time
 from time import sleep
 from Metaheuristics import *
 
-from scoreSolutionGPU import knnLooGPU
+from Metaheuristics.knnGPU.knnLooGPU import knnLooGPU
 
 
 
@@ -39,6 +40,7 @@ def main(algorithm):
 
     for key, value in databases.items():
         np.random.seed(12345678)
+        random.seed(12345678)
 
         dataset, metadata = arff.loadarff(value)
 
