@@ -1,0 +1,252 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{kvoptions-patch}
+\usepackage[titulo={Práctica 2: Búsquedas con trayectorias múltiples}]{estilo}
+
+
+
+\begin{document}
+  \maketitle
+  \tableofcontents
+  \newpage
+
+  \section{Descripción del problema}
+
+    \input{description.tex}
+
+  \section{Descripción de aplicación de los algoritmos al problema}
+    Los elementos comunes de los algoritmos son:
+    \begin{itemize}
+      \item Representación de las soluciones: Se representan las soluciones como vectores 1-dimensionales binarios (los llamaremos \emph{bits} para poder hacer uso de términos como \emph{darle la vuelta a un bit}):
+
+      $$ s = (x_1,x_2,\ldots,x_{n-1},x_n) ; \; x_i \in \{True,False\} \; \forall i \in \{1,2,\ldots,n\} $$
+      \item Función objetivo: La función a maximizar es la tasa de clasificación de los datos de entrada:
+
+      $$ tasa\_clas = 100 \cdot \frac{instancias\;bien\;clasificadas}{instancias\;totales} $$
+
+      \item Generación de vecino: La función generadora de vecinos es bien simple. Se toma una solución y se le da la vuelta a uno de sus bits, el cual se escoge aleatoriamente.
+      \begin{verbatim}
+        Tomar una solución
+        indice = generarAleatorio(0, numero_caracteristicas)
+        caracteristicas[indice] = not caracteristicas[indice]
+      \end{verbatim}
+    \end{itemize}
+  \section{Descripción de la estructura del método de búsqueda}
+    Veamos los esquemas de cada algoritmo en pseudocódigo:
+    \begin{itemize}
+      \item Búsqueda Multiarranque Básica:
+        \begin{verbatim}
+          mejor_solucion = [False,False,...,False]
+          mejor_tasa = 0
+          numero_busquedas = 25
+
+          Desde 1 hasta numero_busquedas
+              caracteristicas_seleccionadas, tasa = LS(datos_entrenamiento,
+                  etiquetas_entrenamiento, clasificador)
+
+              Si tasa > mejor_tasa:
+                  mejor_tasa = tasa
+                  mejor_solucion = caracteristicas_seleccionadas
+
+          return mejor_solucion, mejor_tasa
+        \end{verbatim}
+      \item GRASP:
+      \begin{verbatim}
+        mejor_solucion = [False,False,...,False]
+        mejor_tasa = 0
+        numero_busquedas = 25
+
+        Desde 1 hasta numero_busquedas
+            caracteristicas_seleccionadas, tasa = SFSrandom(datos_entrenamiento,
+                etiquetas_entrenamiento, clasificador)
+            caracteristicas_seleccionadas, tasa = LS(datos_entrenamiento,
+                etiquetas_entrenamiento, clasificador, caracteristicas_seleccionadas)
+
+            Si tasa > mejor_tasa:
+                mejor_tasa = tasa
+                mejor_solucion = caracteristicas_seleccionadas
+
+        return mejor_solucion, mejor_tasa
+      \end{verbatim}
+      \item Iterated Local Search:
+      \begin{verbatim}
+        solucion_inicial = solucionAleatoria()
+        mejor_solucion = solucion_inicial
+        num_searchs = 25
+        mejor_tasa = 0
+
+        caracteristicas_seleccionadas, _ = LS(datos_entrenamiento,
+            etiquetas_entrenamiento, clasificador, solucion_inicial)
+
+        Desde 1 hasta numero_busquedas-1
+            nuevas_caracteristicas, nueva_tasa = LS(datos_entrenamiento,
+                etiquetas_entrenamiento, clasificador,
+                 mutacion(caracteristicas_seleccionadas))
+
+            Si nueva_tasa > mejor_tasa:
+                mejor_tasa = nueva_tasa
+                mejor_solucion = nuevas_caracteristicas
+
+        return mejor_solucion, mejor_tasa
+      \end{verbatim}
+    \end{itemize}
+
+    Para el GRASP se ha tenido que implementar una versión aleatorizada del SFS, la cual mostramos aquí:
+
+    \begin{verbatim}
+      caracteristicas_seleccionadas = [False,False,...,False]
+      mejor_tasa_temporal = 0
+      peor_tasa_temporal = 0
+      mejor_caracteristica = 0
+      mejor_tasa = 0
+      alpha = 0.3
+
+      Mientras mejor_caracteristica no sea None
+          mejor_caracteristica = None
+
+          caracteristicas_disponibles = Índices de caracteristicas de
+            caracteristicas_seleccionadas que están a False
+          tasas = [0,0,...,0]
+          caracteristicas_restringidas = ListaVacía
+
+          ### Enumeración devuelve las características con su índice en el vector
+          Para idx,data_idx en enumeración(caracteristicas_disponibles)
+
+              caracteristicas_seleccionadas[data_idx] = True
+              tasas[idx] = clasificador.tasarSolucion(caracteristicas_seleccionadas)
+              caracteristicas_seleccionadas[data_idx] = False
+
+              Si tasas[idx] > mejor_tasa_temporal
+                  mejor_tasa_temporal = tasas[idx]
+              Si no tasas[idx] < peor_tasa_temporal
+                  peor_tasa_temporal = tasas[idx]
+
+          Para idx,data_idx en enumeración(caracteristicas_disponibles)
+              Si tasas[idx] > umbral
+                  caracteristicas_restringidas.añadir(data_idx)
+
+          caracteristica_aleatoria = aleatorio de caracteristicas_restringidas
+
+          caracteristicas_seleccionadas[caracteristica_aleatoria] = True
+          tasa = clasificador.tasarSolucion(caracteristicas_seleccionadas)
+
+          Si tasa > mejor_tasa
+              mejor_tasa = tasa
+              mejor_caracteristica = caracteristica_aleatoria
+          En otro caso
+              caracteristicas_seleccionadas[caracteristica_aleatoria] = False
+
+      return caracteristicas_seleccionadas, mejor_tasa
+    \end{verbatim}
+
+    Para el ILS el operador de mutación es darle la vuelta al 10\% de los bits de la máscara. Se ha implementado así:
+
+    \begin{verbatim}
+      cambios = EnteroPorArriba(0.1 * longitud(caracteristicas))
+      mascara = repetir(True, cambios)
+      intactos = repetir(False, longitud(caracteristicas) - cambios)
+      mascara_completa = concatenar((mascara,intactos))
+      Shuffle(mascara_completa)
+      caracteristicas_mutadas = np.logical_xor(caracteristicas,mascara_completa)
+      return caracteristicas_mutadas
+    \end{verbatim}
+  \section{Descripción del algoritmo de comparación}
+    El algoritmo de comparación es un algoritmo greedy: el \emph{Sequential Forward Selection(SFS)}. La idea es muy simple: se parte del conjunto vacío de características (todos los bits a 0) y se recorren todas las características, evaluando la función de coste. La característica que más mejora ofrezca, se coje. Y se vuelve a empezar. Así hasta que ninguna de las características mejore el coste.
+
+    \begin{verbatim}
+      caracteristicas = (1,2,...,n)
+      caracteristicas_seleccionadas = (0,0,...,0,0)
+      fin = falso
+      mejor_caracteristica = 0
+
+
+      Mientras mejor_caracteristica != -1
+        mejor_tasa = 0
+        mejor_caracteristica = -1
+        Para cada característica
+          tasa = coste(característica)
+          Si tasa > mejor_tasa
+            mejor_tasa = tasa
+            mejor_caracteristica = caracteristica
+        Si mejor_caracteristica != -1
+          caracteristicas_seleccionadas.añadir(mejor_caracteristica)
+    \end{verbatim}
+  \section{Desarrollo de la práctica}
+    En primer lugar, comentar que las bases de datos han sido modificadas en su estructura (que no en sus datos) para que sean homogéneas. Así, se han puesto todas las clases como numéricas (en Wdbc no lo estaban) y se han colocado en la última columna.
+
+    La práctica se ha desarrollado usando el lenguage de programación \emph{Python}, ya que su velocidad de desarrollo es bastante alta. Para intentar lidiar con la lentitud que puede suponer usar un lenguaje interpretado, utilizaremos las librerías \emph{NumPy, SciPy y Scikit-Learn}, que tienen módulos implementados en C (sobre todo \emph{NumPy}) y agilizan bastante los cálculos y el manejo de vectores grandes.
+
+    Usaremos alguna funcionalidad directa de estas bibliotecas:
+    \begin{itemize}
+      \item \emph{NumPy}: Generación de números aleatorios y operaciones rápidas sobre vectores.
+      \item \emph{SciPy}: Lectura de ficheros ARFF de WEKA.
+      \item \emph{Scikit-Learn}: Particionamiento de los datos, tanto las particiones estratificadas de la validación cruzada 5x2 como las de \emph{Leave One Out} para calcular la función de coste. También se ha tomado un clasificador KNN, ya que está implementado usando estructuras de datos complejas como \emph{Ball Tree} y lo hace muy rápido.
+    \end{itemize}
+
+    Esta elección se ha hecho para poder preocuparme sólo y exclusivamente de la implementación de las metaheurísticas.
+
+    Los requisitos para ejecutar mis prácticas son \emph{Python3} (importante que sea la 3), \emph{NumPy}, \emph{SciPy} y \emph{Scikit-Learn}. En mi plataforma (Archlinux) están disponibles desde su gestor de paquetes.
+
+    Una vez instalados los paquetes, sólo hay que ejecutar la práctica diciéndole al programa los algoritmos que queremos ejecutar. La semilla aleatoria está fijada dentro del código como 12345678 para no inducir a errores. Veamos algunos ejemplos de llamadas a la práctica. Primero notamos que los algoritmos disponibles son:
+
+    \begin{itemize}
+      \item -SFS: Ejecuta el algoritmo greedy SFS.
+      \item -LS: Ejecuta la Local Search.
+      \item -SA: Ejecuta el Simulated Annealing.
+      \item -TS: Ejecuta la Tabu Search.
+      \item -TSext: Ejecuta la Tabu Search extendida.
+      \item -BMB: Ejecuta la Búsqueda Multiarranque Básica.
+      \item -GRASP: Ejecuta el GRASP.
+      \item -ILS: Ejecuta la Iterated Local Search
+    \end{itemize}
+
+    \begin{verbatim}
+      $ python featureSelection.py -TS
+    \end{verbatim}
+    Se ejecutará la Tabu Search. Pero no sólo se limita el programa a un algoritmo. Si le pasamos varios, los ejecutará en serie uno detrás de otro. Esto ha cambiado desde la práctica anterior por la entrada de CUDA, que hay que iniciarlo debidamente y no es tan sencillo de ejecutar cosas en paralelo.
+
+    \begin{verbatim}
+      $ python featureSelection.py -BMB -GRASP -ILS
+    \end{verbatim}
+    Se ejecutarán en paralelo BMB, GRASP e ILS en serie.
+
+    Una vez ejecutado, irán saliendo por pantalla mensajes de este tipo, que proporcionan datos en tiempo real del estado de la ejecución:
+
+    \begin{verbatim}
+      INFO:__main__:W - TS - Time elapsed: 2265.526112794876.
+      Score: 98.2394337654. Score out: 95.0877192982 Selected features: 15
+    \end{verbatim}
+
+    Este mensaje nos dice todo lo necesario: W es la base de datos (Wdbc), TS el algoritmo, el tiempo transcurrido para esta iteración (recordemos que hay 10), el score de entrenamiento, el score de validación y las características seleccionadas.
+  \section{Experimentos}
+    Como se ha comentado antes, la semilla está fija a 12345678 para no tener problemas de aleatoriedad. El número de evaluaciones máxima de todos los algoritmos es de 15000. Por lo demás, todos los demás parámetros propios de cada algoritmo están tal y como se explica en el guión ($\mu=0.3$, los valores de vecinos máximos, soluciones máximas aceptadas, etc). \\
+
+    \newpage
+
+    \centerline{KNN}
+    \input{Tables/KNN-result.tex}\\
+    \centerline{SFS}
+    \input{Tables/SFS-result.tex}
+    \\ \centerline{BMB}
+    \input{Tables/BMB-result.tex}\\
+    \\ \centerline{GRASP}
+    \input{Tables/GRASP-result.tex}
+    \\ \centerline{ILS}
+    \input{Tables/ILS-result.tex} \\
+    \newpage
+    \centerline{Media}
+    \input{Tables/Average2-result.tex}\\
+
+    Meter conclusiones.
+
+
+
+  \section{Referencias}
+
+  Las referencias utilizadas han sido:
+  \begin{itemize}
+    \item \emph{Scikit-Learn}: La propia \fnurl{documentación}{http://scikit-learn.org/stable/modules/classes.html} de la biblioteca.
+    \item \emph{SciPy}: La propia \fnurl{documentación}{http://docs.scipy.org/doc/scipy/reference/} de la biblioteca.
+  \end{itemize}
+
+\end{document}

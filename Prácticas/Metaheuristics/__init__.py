@@ -9,23 +9,9 @@ MAX_EVALUATIONS = 15000
 def flip(selected_features, idx):
     selected_features[idx] = not selected_features[idx]
 
-def score_solution(data_train, target_train, selected_features, scores, classifier):
-    data_number = data_train.shape[0]
-    loo = cross_validation.LeaveOneOut(data_number)
-
-    for idx, partition_idx in enumerate(loo):
-        train_index = partition_idx[0]
-        test_index = partition_idx[1]
-        X_train, X_test = data_train[train_index], data_train[test_index]
-        y_train, y_test = target_train[train_index], target_train[test_index]
-        classifier.fit(X_train[:, selected_features], y_train)
-        scores[idx] = classifier.score(X_test[:, selected_features], y_test)
-    return 100*np.mean(scores)
-
 def KNN(data_train, target_train, classifier):
     selected_features = np.repeat(True, len(data_train[0]))
-    scores = np.zeros(data_train.shape[0], dtype=np.float32)
-    score = score_solution(data_train, target_train, selected_features, scores, classifier)
+    score = classifier.scoreSolution(data_train[:, selected_features], target_train)
     return selected_features, score
 
 
@@ -35,7 +21,6 @@ def SFS(data_train, target_train, classifier):
     selected_features = np.zeros(rowsize, dtype=np.bool)
     best_score = 0
     best_feature = 0
-    scores = np.zeros(data_number, dtype=np.float32)
 
     while best_feature is not None:
         best_feature = None
@@ -45,7 +30,6 @@ def SFS(data_train, target_train, classifier):
         for data_idx in available_features[0]:
 
             selected_features[data_idx] = True
-            # score = score_solution(data_train, target_train, selected_features, scores, classifier)
             score = classifier.scoreSolution(data_train[:, selected_features], target_train)
             selected_features[data_idx] = False
 
@@ -64,8 +48,6 @@ def LS(data_train, target_train, classifier, initial_sol = None):
 
     if initial_sol is None:
         initial_sol = np.random.choice([True, False], rowsize)
-
-    scores = np.zeros(data_number, dtype=np.float32)
 
     selected_features = initial_sol
 
@@ -106,9 +88,8 @@ def SA(data_train, target_train, classifier):
     data_number = data_train.shape[0]
     initial_sol = np.random.choice([True, False], rowsize)
     selected_features = initial_sol
-    scores = np.zeros(data_number, dtype=np.float32)
 
-    best_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+    best_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
     actual_score = best_score
     best_solution = np.copy(initial_sol)
 
@@ -134,7 +115,7 @@ def SA(data_train, target_train, classifier):
                 break
             feature = np.random.randint(rowsize)
             flip(selected_features, feature)
-            new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+            new_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
 
             deltaF = actual_score - new_score
 
@@ -166,11 +147,9 @@ def TS(data_train, target_train, classifier):
 
     initial_sol = np.random.choice([True, False], rowsize)
 
-    scores = np.zeros(data_number, dtype=np.float32)
-
     selected_features = initial_sol
 
-    best_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+    best_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
 
     size_tabu_list = rowsize // 3
     tabu_list = np.repeat(-1,size_tabu_list)
@@ -193,7 +172,7 @@ def TS(data_train, target_train, classifier):
             #     feature = np.random.randint(rowsize)
             #     flip(selected_features, feature)
 
-            new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+            new_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
             flip(selected_features, idx)
 
             evaluations += 1
@@ -224,12 +203,11 @@ def TSext(data_train, target_train, classifier):
 
     initial_sol = np.random.choice([True, False], rowsize)
 
-    scores = np.zeros(data_number, dtype=np.float32)
     frec = np.zeros(rowsize, dtype=np.int32)
 
     selected_features = initial_sol
 
-    best_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+    best_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
 
     size_tabu_list = rowsize // 3
     tabu_list = np.repeat(-1,size_tabu_list)
@@ -276,7 +254,7 @@ def TSext(data_train, target_train, classifier):
             #     feature = np.random.randint(rowsize)
             #     flip(selected_features, feature)
 
-            new_score = score_solution(data_train, target_train, selected_features, scores, classifier)
+            new_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
             flip(selected_features, idx)
 
             evaluations += 1
@@ -320,29 +298,27 @@ def SFSrandom(data_train, target_train, classifier):
     best_feature = 0
     best_score = 0
     alpha = 0.3
-    # scores = np.zeros(data_number, dtype=np.float32)
 
     while best_feature is not None:
         best_feature = None
 
         available_features = np.where(selected_features == False)
-        score_features = np.zeros(available_features.shape[0])
+        score_features = np.zeros(len(available_features[0]))
         restricted_features = []
 
         for idx,data_idx in enumerate(available_features[0]):
 
             selected_features[data_idx] = True
-            # score = score_solution(data_train, target_train, selected_features, scores, classifier)
             score_features[idx] = classifier.scoreSolution(data_train[:, selected_features], target_train)
             selected_features[data_idx] = False
 
-            if score > best_tmp_score:
-                best_tmp_score = score
-            elif score < worst_score:
-                worst_tmp_score = score
+            if score_features[idx] > best_tmp_score:
+                best_tmp_score = score_features[idx]
+            elif score_features[idx] < worst_tmp_score:
+                worst_tmp_score = score_features[idx]
 
         for idx,data_idx in enumerate(available_features[0]):
-            if score[idx] > best_tmp_score - alpha * (best_tmp_score - worst_tmp_score):
+            if score_features[idx] > best_tmp_score - alpha * (best_tmp_score - worst_tmp_score):
                 restricted_features.append(data_idx)
 
         random_feature = np.random.choice(restricted_features)
@@ -360,7 +336,6 @@ def SFSrandom(data_train, target_train, classifier):
 
 def BMB(data_train, target_train, classifier):
     rowsize = len(data_train[0])
-    data_number = data_train.shape[0]
 
     best_solution = np.zeros(rowsize, dtype=np.bool)
     best_score = 0
@@ -399,10 +374,8 @@ def ILS(data_train, target_train, classifier):
         changes = np.ceil(0.1 * len(features))
         mask = np.repeat(True, changes)
         unchanged = np.repeat(False, len(features) - changes)
-
         full_mask = np.concatenate((mask,unchanged))
-        full_mask = np.random.shuffle(full_mask)
-
+        np.random.shuffle(full_mask)
         mutated_features = np.logical_xor(features,full_mask)
         return mutated_features
 
@@ -410,10 +383,11 @@ def ILS(data_train, target_train, classifier):
     data_number = data_train.shape[0]
 
     initial_sol = np.random.choice([True, False], rowsize)
+    best_solution = initial_sol
     num_searchs = 25
     best_score = 0
 
-    selected_features = LS(data_train, target_train, classifier, initial_sol)
+    selected_features, _ = LS(data_train, target_train, classifier, initial_sol)
 
     for _ in range(num_searchs - 1):
         new_selected_features, new_score = LS(data_train, target_train, classifier, mutation(selected_features))

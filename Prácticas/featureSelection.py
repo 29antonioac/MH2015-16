@@ -24,11 +24,14 @@ from Metaheuristics.knnGPU.knnLooGPU import knnLooGPU
 
 def main(algorithm):
 
+    print("Launching",algorithm)
+
     logging.basicConfig(level=logging.INFO)
 
     logger = logging.getLogger(__name__)
 
-    arg_algorithms = {"-KNN" : KNN, "-SFS" : SFS, "-LS" : LS, "-SA" : SA, "-TS" : TS, "-TSext" : TSext}
+    arg_algorithms = {"-KNN" : KNN, "-SFS" : SFS, "-LS" : LS, "-SA" : SA, "-TS" : TS, "-TSext" : TSext,
+                        "-BMB" : BMB, "-GRASP" : GRASP, "-ILS" : ILS }
     algorithm_table = {}
     alg = arg_algorithms[algorithm]
 
@@ -159,8 +162,10 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         main(sys.argv[1])
     elif len(sys.argv) > 2:
-        p = multiprocessing.Pool(min(len(sys.argv) - 1,multiprocessing.cpu_count()))
-        p.map(main, sys.argv[1:])
+        # p = multiprocessing.Pool(min(len(sys.argv) - 1,multiprocessing.cpu_count()))
+        print("HOLI",sys.argv[1:])
+        for input in sys.argv[1:]:
+            main(input)
     else:
         print("Give me an algorithm")
         print("-KNN, -SFS, -LS, -SA, -TS, -TSext")
