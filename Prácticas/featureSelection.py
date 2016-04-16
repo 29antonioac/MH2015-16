@@ -32,7 +32,7 @@ def main(algorithm):
 
     arg_algorithms = {"-KNN" : KNN, "-SFS" : SFS, "-LS" : LS, "-SA" : SA, "-TS" : TS, "-TSext" : TSext,
                         "-BMB" : BMB, "-GRASP" : GRASP, "-ILS" : ILS,
-                        "-GA" : GA }
+                        "-GGA" : GGA, "-EGA" : EGA }
     algorithm_table = {}
     alg = arg_algorithms[algorithm]
 
@@ -62,6 +62,7 @@ def main(algorithm):
 
         repeats = 5
         n_folds = 2
+        scorerGPU = knnLooGPU(data.shape[0], data.shape[1], 3)
 
         for iteration in range(repeats):
             skf = StratifiedKFold(target, n_folds=n_folds, shuffle=True)
@@ -71,7 +72,6 @@ def main(algorithm):
                 test_index = partition[1]
                 data_train, data_test = data[train_index], data[test_index]
                 target_train, target_test = target[train_index], target[test_index]
-                scorerGPU = knnLooGPU(data_train.shape[0], data_train.shape[1], 3)
 
                 actual_items = algorithm_table.setdefault("items", [{} for _ in range(repeats*n_folds)])
                 item = actual_items[2*iteration + run]

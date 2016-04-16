@@ -415,8 +415,8 @@ def GA(data_train, target_train, classifier, generational=False):
     xover_number = np.ceil(xover_probability * selected_number / 2).astype(np.int32)
     mutation_number = np.ceil(mutation_probability * selected_number * rowsize).astype(np.int32)
 
-    print(xover_number)
-    print(mutation_number)
+    # print(xover_number)
+    # print(mutation_number)
     ## Initialize and evaluate the population
     size_chromosome_string = str(rowsize) + 'bool'
     datatype = np.dtype( [('chromosome',size_chromosome_string), ('score',np.float32)] )
@@ -425,8 +425,8 @@ def GA(data_train, target_train, classifier, generational=False):
 
     population["chromosome"] = np.random.choice([True,False], (population_size, rowsize))
 
-    for chromosome in population:
-        chromosome["score"] = classifier.scoreSolution(data_train[:,chromosome["chromosome"]],target_train)
+    for individual in population:
+        individual["score"] = classifier.scoreSolution(data_train[:,individual["chromosome"]],target_train)
 
     population.sort(order="score")
     # print(population)
@@ -460,8 +460,8 @@ def GA(data_train, target_train, classifier, generational=False):
             flip(selected[mut_chromosome]["chromosome"],mut_gene)
 
         ### Update child's score
-        for chromosome in selected:
-            chromosome["score"] = classifier.scoreSolution(data_train[:,chromosome["chromosome"]],target_train)
+        for individual in selected:
+            individual["score"] = classifier.scoreSolution(data_train[:,individual["chromosome"]],target_train)
         selected.sort(order="score")
 
 
@@ -469,8 +469,16 @@ def GA(data_train, target_train, classifier, generational=False):
 
         for idx in range(selected.shape[0] - 1):
             population[idx] = selected[-idx]
+        if generational:
+            population[0] = best_solution
 
     population.sort(order="score")
     best_solution, best_score = population[-1]["chromosome"], population[-1]["score"]
-    print("Best_sol=",best_solution, "Best_score=",best_score)
+    # print("Best_sol=",best_solution, "Best_score=",best_score)
     return best_solution, best_score
+
+def GGA(data_train, target_train, classifier):
+    return GA(data_train, target_train, classifier, generational=True)
+
+def EGA(data_train, target_train, classifier):
+    return GA(data_train, target_train, classifier, generational=False)
