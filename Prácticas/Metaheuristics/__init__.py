@@ -444,7 +444,7 @@ def GA(data_train, target_train, classifier, generational=False):
         for idx in range(selected_number):
             choices = np.random.choice(population,2)
             choices.sort(order="score")
-            best = choices[-1] # Take the best
+            best = choices[-1].copy() # Take the best
             selected[idx] = best
 
         ### Xover
