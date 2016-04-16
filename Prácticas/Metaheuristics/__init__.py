@@ -380,7 +380,6 @@ def ILS(data_train, target_train, classifier):
         return mutated_features
 
     rowsize = len(data_train[0])
-    data_number = data_train.shape[0]
 
     initial_sol = np.random.choice([True, False], rowsize)
     best_solution = initial_sol
@@ -396,4 +395,82 @@ def ILS(data_train, target_train, classifier):
             best_score = new_score
             np.copyto(best_solution, new_selected_features)
 
+    return best_solution, best_score
+
+def GA(data_train, target_train, classifier, generational=False):
+    rowsize = len(data_train[0])
+
+    evaluations = 0
+    max_eval = 15000
+
+    xover_probability = 0.7
+    mutation_probability = 0.001
+
+    population_size = 30
+    selected_number = rowsize
+
+    if not generational:
+        selected_number = 2
+
+    xover_number = np.ceil(xover_probability * selected_number / 2).astype(np.int32)
+    mutation_number = np.ceil(mutation_probability * selected_number * rowsize).astype(np.int32)
+
+    print(xover_number)
+    print(mutation_number)
+    ## Initialize and evaluate the population
+    size_chromosome_string = str(rowsize) + 'bool'
+    datatype = np.dtype( [('chromosome',size_chromosome_string), ('score',np.float32)] )
+
+    population = np.zeros(population_size, dtype=datatype)
+
+    population["chromosome"] = np.random.choice([True,False], (population_size, rowsize))
+
+    for chromosome in population:
+        chromosome["score"] = classifier.scoreSolution(data_train[:,chromosome["chromosome"]],target_train)
+
+    population.sort(order="score")
+    # print(population)
+
+    ##################################
+
+    while evaluations < max_eval:
+        evaluations += 1
+
+        best_solution = population["chromosome"][-1] # Take the best
+
+        ### Selection
+        selected = np.zeros(selected_number, datatype)
+
+        for idx in range(selected_number):
+            choices = np.random.choice(population,2)
+            choices.sort(order="score")
+            best = choices[-1] # Take the best
+            selected[idx] = best
+
+        ### Xover
+        for idx in range(0,xover_number,2):
+            x_points = np.random.randint(1,rowsize-1,2)
+            selected[idx]["chromosome"][x_points[0]:x_points[1]], selected[idx+1]["chromosome"][x_points[0]:x_points[1]] = selected[idx]["chromosome"][x_points[0]:x_points[1]], selected[idx+1]["chromosome"][x_points[0]:x_points[1]]
+
+        ### Mutation
+        for _ in range(mutation_number):
+            mut_chromosome = np.random.randint(selected_number)
+            mut_gene = np.random.randint(rowsize)
+
+            flip(selected[mut_chromosome]["chromosome"],mut_gene)
+
+        ### Update child's score
+        for chromosome in selected:
+            chromosome["score"] = classifier.scoreSolution(data_train[:,chromosome["chromosome"]],target_train)
+        selected.sort(order="score")
+
+
+        ### Replace
+
+        for idx in range(selected.shape[0] - 1):
+            population[idx] = selected[-idx]
+
+    population.sort(order="score")
+    best_solution, best_score = population[-1]["chromosome"], population[-1]["score"]
+    print("Best_sol=",best_solution, "Best_score=",best_score)
     return best_solution, best_score

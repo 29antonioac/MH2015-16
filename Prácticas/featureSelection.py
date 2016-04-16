@@ -31,7 +31,8 @@ def main(algorithm):
     logger = logging.getLogger(__name__)
 
     arg_algorithms = {"-KNN" : KNN, "-SFS" : SFS, "-LS" : LS, "-SA" : SA, "-TS" : TS, "-TSext" : TSext,
-                        "-BMB" : BMB, "-GRASP" : GRASP, "-ILS" : ILS }
+                        "-BMB" : BMB, "-GRASP" : GRASP, "-ILS" : ILS,
+                        "-GA" : GA }
     algorithm_table = {}
     alg = arg_algorithms[algorithm]
 
