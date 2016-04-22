@@ -62,7 +62,7 @@ def main(algorithm):
 
         repeats = 5
         n_folds = 2
-        scorerGPU = knnLooGPU(data.shape[0], data.shape[1], 3)
+
 
         for iteration in range(repeats):
             skf = StratifiedKFold(target, n_folds=n_folds, shuffle=True)
@@ -76,13 +76,16 @@ def main(algorithm):
                 actual_items = algorithm_table.setdefault("items", [{} for _ in range(repeats*n_folds)])
                 item = actual_items[2*iteration + run]
 
+                scorerGPU = knnLooGPU(data_train.shape[0], data_test.shape[0], data.shape[1], 3)
+
 
                 start = time()
                 selected_features, score = alg(data_train, target_train, scorerGPU)
                 end = time()
 
-                knn.fit(data_train[:,selected_features], target_train)
-                score_out = 100*knn.score(data_test[:,selected_features], target_test)
+                # knn.fit(data_train[:,selected_features], target_train)
+                # score_out = 100*knn.score(data_test[:,selected_features], target_test)
+                score_out = scorerGPU.scoreOut(data_train, data_test, target_train, target_test)
 
                 item["name"] = "Partición " + str(iteration+1) + "-" + str(run+1)
                 item[key+"_clas_in"] = float("{:,.5f}".format(score))

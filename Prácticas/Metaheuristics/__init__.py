@@ -401,13 +401,13 @@ def GA(data_train, target_train, classifier, generational=False):
     rowsize = len(data_train[0])
 
     evaluations = 0
-    max_eval = 15000
+    max_eval = 10
 
     xover_probability = 0.7
     mutation_probability = 0.001
 
     population_size = 30
-    selected_number = rowsize
+    selected_number = population_size
 
     if not generational:
         selected_number = 2
@@ -415,8 +415,6 @@ def GA(data_train, target_train, classifier, generational=False):
     xover_number = np.ceil(xover_probability * selected_number / 2).astype(np.int32)
     mutation_number = np.ceil(mutation_probability * selected_number * rowsize).astype(np.int32)
 
-    # print(xover_number)
-    # print(mutation_number)
     ## Initialize and evaluate the population
     size_chromosome_string = str(rowsize) + 'bool'
     datatype = np.dtype( [('chromosome',size_chromosome_string), ('score',np.float32)] )
@@ -429,7 +427,6 @@ def GA(data_train, target_train, classifier, generational=False):
         individual["score"] = classifier.scoreSolution(data_train[:,individual["chromosome"]],target_train)
 
     population.sort(order="score")
-    # print(population)
 
     ##################################
 
@@ -466,7 +463,6 @@ def GA(data_train, target_train, classifier, generational=False):
 
 
         ### Replace
-
         for idx in range(selected.shape[0] - 1):
             population[idx] = selected[-idx]
         if generational:
@@ -474,7 +470,6 @@ def GA(data_train, target_train, classifier, generational=False):
 
     population.sort(order="score")
     best_solution, best_score = population[-1]["chromosome"], population[-1]["score"]
-    # print("Best_sol=",best_solution, "Best_score=",best_score)
     return best_solution, best_score
 
 def GGA(data_train, target_train, classifier):
