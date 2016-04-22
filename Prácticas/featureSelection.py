@@ -85,7 +85,7 @@ def main(algorithm):
 
                 # knn.fit(data_train[:,selected_features], target_train)
                 # score_out = 100*knn.score(data_test[:,selected_features], target_test)
-                score_out = scorerGPU.scoreOut(data_train, data_test, target_train, target_test)
+                score_out = scorerGPU.scoreOut(data_train[:,selected_features], data_test[:,selected_features], target_train, target_test)
 
                 item["name"] = "Partición " + str(iteration+1) + "-" + str(run+1)
                 item[key+"_clas_in"] = float("{:,.5f}".format(score))
