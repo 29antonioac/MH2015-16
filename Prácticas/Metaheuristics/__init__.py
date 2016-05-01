@@ -450,11 +450,15 @@ def GA(data_train, target_train, classifier, generational=False):
             selected[idx]["chromosome"][x_points[0]:x_points[1]], selected[idx+1]["chromosome"][x_points[0]:x_points[1]] = selected[idx]["chromosome"][x_points[0]:x_points[1]], selected[idx+1]["chromosome"][x_points[0]:x_points[1]]
 
         ### Mutation
-        for _ in range(mutation_number):
-            mut_chromosome = np.random.randint(selected_number)
-            mut_gene = np.random.randint(rowsize)
+        # for _ in range(mutation_number):
+        #     mut_chromosome = np.random.randint(selected_number)
+        #     mut_gene = np.random.randint(rowsize)
+        #
+        #     flip(selected[mut_chromosome]["chromosome"],mut_gene)
 
-            flip(selected[mut_chromosome]["chromosome"],mut_gene)
+        ### Memetic
+        for individual in selected:
+            individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, individual["chromosome"])
 
         ### Update child's score
         for individual in selected:
