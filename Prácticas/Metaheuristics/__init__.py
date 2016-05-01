@@ -431,7 +431,7 @@ def GA(data_train, target_train, classifier, generational=False):
     ##################################
 
     while evaluations < max_eval:
-        evaluations += 1
+        # evaluations += 1
 
         best_solution = population["chromosome"][-1] # Take the best
 
@@ -458,6 +458,7 @@ def GA(data_train, target_train, classifier, generational=False):
 
         ### Update child's score
         for individual in selected:
+            evaluations += 1
             individual["score"] = classifier.scoreSolution(data_train[:,individual["chromosome"]],target_train)
         selected.sort(order="score")
 
