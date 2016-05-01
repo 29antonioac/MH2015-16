@@ -166,10 +166,8 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         main(sys.argv[1])
     elif len(sys.argv) > 2:
-        # p = multiprocessing.Pool(min(len(sys.argv) - 1,multiprocessing.cpu_count()))
-        print("HOLI",sys.argv[1:])
         for input in sys.argv[1:]:
             main(input)
     else:
         print("Give me an algorithm")
-        print("-KNN, -SFS, -LS, -SA, -TS, -TSext")
+        print("-KNN, -SFS, -LS, -SA, -TS, -TSext, -BMB, -GRASP, -ILS, -EGA, -GGA")
