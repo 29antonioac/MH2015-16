@@ -401,7 +401,7 @@ def GA(data_train, target_train, classifier, generational=False):
     rowsize = len(data_train[0])
 
     evaluations = 0
-    max_eval = 10
+    max_eval = 15000
 
     xover_probability = 0.7
     mutation_probability = 0.001
