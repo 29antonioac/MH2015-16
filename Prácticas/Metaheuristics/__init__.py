@@ -456,7 +456,7 @@ def GA(data_train, target_train, classifier, generational=False):
 
             flip(selected[mut_chromosome]["chromosome"],mut_gene)
 
-        ### Memetic
+        ### Memetic ?
         # for individual in selected:
         #     individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, individual["chromosome"])
 

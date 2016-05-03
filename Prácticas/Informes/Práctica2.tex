@@ -15,22 +15,7 @@
     \input{description.tex}
 
   \section{Descripción de aplicación de los algoritmos al problema}
-    Los elementos comunes de los algoritmos son:
-    \begin{itemize}
-      \item Representación de las soluciones: Se representan las soluciones como vectores 1-dimensionales binarios (los llamaremos \emph{bits} para poder hacer uso de términos como \emph{darle la vuelta a un bit}):
-
-      $$ s = (x_1,x_2,\ldots,x_{n-1},x_n) ; \; x_i \in \{True,False\} \; \forall i \in \{1,2,\ldots,n\} $$
-      \item Función objetivo: La función a maximizar es la tasa de clasificación de los datos de entrada:
-
-      $$ tasa\_clas = 100 \cdot \frac{instancias\;bien\;clasificadas}{instancias\;totales} $$
-
-      \item Generación de vecino: La función generadora de vecinos es bien simple. Se toma una solución y se le da la vuelta a uno de sus bits, el cual se escoge aleatoriamente.
-      \begin{verbatim}
-        Tomar una solución
-        indice = generarAleatorio(0, numero_caracteristicas)
-        caracteristicas[indice] = not caracteristicas[indice]
-      \end{verbatim}
-    \end{itemize}
+    \input{comunes.tex}
   \section{Descripción de la estructura del método de búsqueda}
     Veamos los esquemas de cada algoritmo en pseudocódigo:
     \begin{itemize}
@@ -151,26 +136,7 @@
       return caracteristicas_mutadas
     \end{verbatim}
   \section{Descripción del algoritmo de comparación}
-    El algoritmo de comparación es un algoritmo greedy: el \emph{Sequential Forward Selection(SFS)}. La idea es muy simple: se parte del conjunto vacío de características (todos los bits a 0) y se recorren todas las características, evaluando la función de coste. La característica que más mejora ofrezca, se coje. Y se vuelve a empezar. Así hasta que ninguna de las características mejore el coste.
-
-    \begin{verbatim}
-      caracteristicas = (1,2,...,n)
-      caracteristicas_seleccionadas = (0,0,...,0,0)
-      fin = falso
-      mejor_caracteristica = 0
-
-
-      Mientras mejor_caracteristica != -1
-        mejor_tasa = 0
-        mejor_caracteristica = -1
-        Para cada característica
-          tasa = coste(característica)
-          Si tasa > mejor_tasa
-            mejor_tasa = tasa
-            mejor_caracteristica = caracteristica
-        Si mejor_caracteristica != -1
-          caracteristicas_seleccionadas.añadir(mejor_caracteristica)
-    \end{verbatim}
+    \input{comparacion.tex}
   \section{Desarrollo de la práctica}
     En primer lugar, comentar que las bases de datos han sido modificadas en su estructura (que no en sus datos) para que sean homogéneas. Así, se han puesto todas las clases como numéricas (en Wdbc no lo estaban) y se han colocado en la última columna.
 

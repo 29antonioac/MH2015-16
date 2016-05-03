@@ -1,0 +1,20 @@
+El algoritmo de comparación es un algoritmo greedy: el \emph{Sequential Forward Selection(SFS)}. La idea es muy simple: se parte del conjunto vacío de características (todos los bits a 0) y se recorren todas las características, evaluando la función de coste. La característica que más mejora ofrezca, se coje. Y se vuelve a empezar. Así hasta que ninguna de las características mejore el coste.
+
+\begin{verbatim}
+  caracteristicas = (1,2,...,n)
+  caracteristicas_seleccionadas = (0,0,...,0,0)
+  fin = falso
+  mejor_caracteristica = 0
+
+
+  Mientras mejor_caracteristica != -1
+    mejor_tasa = 0
+    mejor_caracteristica = -1
+    Para cada característica
+      tasa = coste(característica)
+      Si tasa > mejor_tasa
+        mejor_tasa = tasa
+        mejor_caracteristica = caracteristica
+    Si mejor_caracteristica != -1
+      caracteristicas_seleccionadas.añadir(mejor_caracteristica)
+\end{verbatim}

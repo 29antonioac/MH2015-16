@@ -1,0 +1,16 @@
+Los elementos comunes de los algoritmos son:
+\begin{itemize}
+  \item Representación de las soluciones: Se representan las soluciones como vectores 1-dimensionales binarios (los llamaremos \emph{bits} para poder hacer uso de términos como \emph{darle la vuelta a un bit}):
+
+  $$ s = (x_1,x_2,\ldots,x_{n-1},x_n) ; \; x_i \in \{True,False\} \; \forall i \in \{1,2,\ldots,n\} $$
+  \item Función objetivo: La función a maximizar es la tasa de clasificación de los datos de entrada:
+
+  $$ tasa\_clas = 100 \cdot \frac{instancias\;bien\;clasificadas}{instancias\;totales} $$
+
+  \item Generación de vecino: La función generadora de vecinos es bien simple. Se toma una solución y se le da la vuelta a uno de sus bits, el cual se escoge aleatoriamente.
+  \begin{verbatim}
+    Tomar un vector de características "caracteristica"
+    indice = generarAleatorio(0, numero_caracteristicas)
+    caracteristicas[indice] = not caracteristicas[indice]
+  \end{verbatim}
+\end{itemize}
