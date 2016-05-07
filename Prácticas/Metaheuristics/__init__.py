@@ -470,7 +470,7 @@ def GA(data_train, target_train, classifier, generational=False):
         ### Replace
         for idx in range(selected.shape[0] - 1):
             population[idx] = selected[-idx]
-        if generational:
+        if generational and population[0]["score"] < best_solution["score"]:
             population[0] = best_solution
 
     population.sort(order="score")
