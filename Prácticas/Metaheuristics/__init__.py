@@ -413,7 +413,7 @@ def GA(data_train, target_train, classifier, generational=False):
         selected_number = 2
 
     xover_number = np.ceil(xover_probability * selected_number / 2).astype(np.int32)
-    mutation_number = np.ceil(mutation_probability * selected_number * rowsize).astype(np.int32)
+    full_mutation_probability = mutation_probability * selected_number * rowsize
 
     ## Initialize and evaluate the population
     size_chromosome_string = str(rowsize) + 'bool'
@@ -431,9 +431,8 @@ def GA(data_train, target_train, classifier, generational=False):
     ##################################
 
     while evaluations < max_eval:
-        # evaluations += 1
 
-        best_solution = population["chromosome"][-1] # Take the best
+        best_solution = population[-1] # Take the best
 
         ### Selection
         selected = np.zeros(selected_number, datatype)
@@ -450,7 +449,7 @@ def GA(data_train, target_train, classifier, generational=False):
             selected[idx]["chromosome"][x_points[0]:x_points[1]], selected[idx+1]["chromosome"][x_points[0]:x_points[1]] = selected[idx]["chromosome"][x_points[0]:x_points[1]], selected[idx+1]["chromosome"][x_points[0]:x_points[1]]
 
         ### Mutation
-        for _ in range(mutation_number):
+        if np.random.uniform() < full_mutation_probability:
             mut_chromosome = np.random.randint(selected_number)
             mut_gene = np.random.randint(rowsize)
 
