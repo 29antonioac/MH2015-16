@@ -1,0 +1,227 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{kvoptions-patch}
+\usepackage[titulo={Práctica 3: Algoritmos genéticos}]{estilo}
+
+
+
+\begin{document}
+  \maketitle
+  \tableofcontents
+  \newpage
+
+  \section{Descripción del problema}
+
+    \input{description.tex}
+
+  \section{Descripción de aplicación de los algoritmos al problema}
+    \input{comunes.tex}
+  \section{Descripción de la estructura del método de búsqueda}
+    Veamos los esquemas de cada algoritmo en pseudocódigo:
+    \begin{itemize}
+      \item Búsqueda Multiarranque Básica:
+        \begin{verbatim}
+          mejor_solucion = [False,False,...,False]
+          mejor_tasa = 0
+          numero_busquedas = 25
+
+          Desde 1 hasta numero_busquedas
+              caracteristicas_seleccionadas, tasa = LS(datos_entrenamiento,
+                  etiquetas_entrenamiento, clasificador)
+
+              Si tasa > mejor_tasa:
+                  mejor_tasa = tasa
+                  mejor_solucion = caracteristicas_seleccionadas
+
+          return mejor_solucion, mejor_tasa
+        \end{verbatim}
+      \item GRASP:
+      \begin{verbatim}
+        mejor_solucion = [False,False,...,False]
+        mejor_tasa = 0
+        numero_busquedas = 25
+
+        Desde 1 hasta numero_busquedas
+            caracteristicas_seleccionadas, tasa = SFSrandom(datos_entrenamiento,
+                etiquetas_entrenamiento, clasificador)
+
+            # Lanzamos una Local Search con la solución encontrada
+            # con SFSrandom como solución inicial
+            caracteristicas_seleccionadas, tasa = LS(datos_entrenamiento,
+                etiquetas_entrenamiento, clasificador, caracteristicas_seleccionadas)
+
+            Si tasa > mejor_tasa:
+                mejor_tasa = tasa
+                mejor_solucion = caracteristicas_seleccionadas
+
+        return mejor_solucion, mejor_tasa
+      \end{verbatim}
+      \item Iterated Local Search:
+      \begin{verbatim}
+        solucion_inicial = solucionAleatoria()
+        mejor_solucion = solucion_inicial
+        num_searchs = 25
+        mejor_tasa = 0
+
+        caracteristicas_seleccionadas, _ = LS(datos_entrenamiento,
+            etiquetas_entrenamiento, clasificador, solucion_inicial)
+
+        Desde 1 hasta numero_busquedas-1
+            # Lanzamos una Local Search con la solución
+            # anterior mutada como solución inicial
+            nuevas_caracteristicas, nueva_tasa = LS(datos_entrenamiento,
+                etiquetas_entrenamiento, clasificador,
+                 mutacion(caracteristicas_seleccionadas))
+
+            Si nueva_tasa > mejor_tasa:
+                mejor_tasa = nueva_tasa
+                mejor_solucion = nuevas_caracteristicas
+
+        return mejor_solucion, mejor_tasa
+      \end{verbatim}
+    \end{itemize}
+
+    Para el GRASP se ha tenido que implementar una versión aleatorizada del SFS, la cual mostramos aquí:
+
+    \begin{verbatim}
+      caracteristicas_seleccionadas = [False,False,...,False]
+      mejor_tasa_temporal = 0
+      peor_tasa_temporal = 0
+      mejor_caracteristica = 0
+      mejor_tasa = 0
+      alpha = 0.3
+
+      Mientras mejor_caracteristica no sea None
+          mejor_caracteristica = None
+
+          caracteristicas_disponibles = Índices de caracteristicas de
+            caracteristicas_seleccionadas que están a False
+          tasas = [0,0,...,0]
+          caracteristicas_restringidas = ListaVacía
+
+          # Enumeración devuelve las características con su índice en el vector
+          # 0 -> caracteristica 0
+          # 1 -> caracteristica 1
+          # ...
+          Para indice,caracteristica en enumeración(caracteristicas_disponibles)
+
+              tasas[indice] = coste al añadir caracteristica a las características seleccionadas
+
+              Si tasas[indice] > mejor_tasa_temporal
+                  mejor_tasa_temporal = tasas[indice]
+              Si no tasas[indice] < peor_tasa_temporal
+                  peor_tasa_temporal = tasas[indice]
+
+          Para indice,caracteristica en enumeración(caracteristicas_disponibles)
+              Si tasas[indice] > umbral
+                  caracteristicas_restringidas.añadir(caracteristica)
+
+          caracteristica_aleatoria = aleatorio de caracteristicas_restringidas
+
+          tasa = coste al añadir caracteristica_aleatoria a las características seleccionadas
+
+          Si tasa > mejor_tasa
+              mejor_tasa = tasa
+              mejor_caracteristica = caracteristica_aleatoria
+
+      return caracteristicas_seleccionadas, mejor_tasa
+    \end{verbatim}
+
+    \newpage
+    Para el ILS el operador de mutación es darle la vuelta al 10\% de los bits de la máscara. Se ha implementado así:
+
+    \begin{verbatim}
+      cambios = EnteroPorArriba(0.1 * longitud(caracteristicas))
+      mascara = vector aleatorio con "cambios" True y el resto False
+      caracteristicas_mutadas = XOR(caracteristicas,mascara)
+      return caracteristicas_mutadas
+    \end{verbatim}
+  \section{Descripción del algoritmo de comparación}
+    \input{comparacion.tex}
+  \section{Desarrollo de la práctica}
+    En primer lugar, comentar que las bases de datos han sido modificadas en su estructura (que no en sus datos) para que sean homogéneas. Así, se han puesto todas las clases como numéricas (en Wdbc no lo estaban) y se han colocado en la última columna.
+
+    La práctica se ha desarrollado usando el lenguage de programación \emph{Python}, ya que su velocidad de desarrollo es bastante alta. Para intentar lidiar con la lentitud que puede suponer usar un lenguaje interpretado, utilizaremos las librerías \emph{NumPy, SciPy y Scikit-Learn}, que tienen módulos implementados en C (sobre todo \emph{NumPy}) y agilizan bastante los cálculos y el manejo de vectores grandes. Para el KNN con Leave One Out se ha utilizado un módulo que ha desarrollado mi compañero \fnurl{Alejandro García Montoro}{https://github.com/agarciamontoro/metaheuristics}, que usa \emph{CUDA} para agilizar los cálculos usando la GPU.
+
+    Usaremos alguna funcionalidad directa de estas bibliotecas:
+    \begin{itemize}
+      \item \emph{NumPy}: Generación de números aleatorios y operaciones rápidas sobre vectores.
+      \item \emph{SciPy}: Lectura de ficheros ARFF de WEKA.
+      \item \emph{Scikit-Learn}: Particionamiento de los datos, se han usado las particiones estratificadas de la validación cruzada 5x2.
+      \item \emph{ScorerGPU}: Para el KNN con Leave One Out.
+    \end{itemize}
+
+    Esta elección se ha hecho para poder preocuparme sólo y exclusivamente de la implementación de las metaheurísticas.
+
+    Los requisitos para ejecutar mis prácticas son \emph{Python3} (importante que sea la 3), \emph{NumPy}, \emph{SciPy}, \emph{Scikit-Learn} y \emph{CUDA}, por lo que es necesario una gráfica nVidia. En mi plataforma (Archlinux) están disponibles desde su gestor de paquetes.
+
+    Una vez instalados los paquetes, sólo hay que ejecutar la práctica diciéndole al programa los algoritmos que queremos ejecutar. La semilla aleatoria está fijada dentro del código como 12345678 para no inducir a errores. Veamos algunos ejemplos de llamadas a la práctica. Primero notamos que los algoritmos disponibles son:
+
+    \begin{itemize}
+      \item -SFS: Ejecuta el algoritmo greedy SFS.
+      \item -LS: Ejecuta la Local Search.
+      \item -SA: Ejecuta el Simulated Annealing.
+      \item -TS: Ejecuta la Tabu Search.
+      \item -TSext: Ejecuta la Tabu Search extendida.
+      \item -BMB: Ejecuta la Búsqueda Multiarranque Básica.
+      \item -GRASP: Ejecuta el GRASP.
+      \item -ILS: Ejecuta la Iterated Local Search
+    \end{itemize}
+
+    \begin{verbatim}
+      $ python featureSelection.py -TS
+    \end{verbatim}
+    Se ejecutará la Tabu Search. Pero no sólo se limita el programa a un algoritmo. Si le pasamos varios, los ejecutará en serie uno detrás de otro. Esto ha cambiado desde la práctica anterior por la entrada de \emph{CUDA}, que hay que iniciarlo debidamente y no es tan sencillo de ejecutar cosas en paralelo.
+
+    \begin{verbatim}
+      $ python featureSelection.py -BMB -GRASP -ILS
+    \end{verbatim}
+    Se ejecutarán BMB, GRASP e ILS en serie.
+
+    Una vez ejecutado, irán saliendo por pantalla mensajes de este tipo, que proporcionan datos en tiempo real del estado de la ejecución:
+
+    \begin{verbatim}
+      INFO:__main__:W - TS - Time elapsed: 2265.526112794876.
+      Score: 98.2394337654. Score out: 95.0877192982 Selected features: 15
+    \end{verbatim}
+
+    Este mensaje nos dice todo lo necesario: W es la base de datos (Wdbc), TS el algoritmo, el tiempo transcurrido para esta iteración (recordemos que hay 10), el score de entrenamiento, el score de validación y las características seleccionadas.
+  \section{Experimentos}
+    Como se ha comentado antes, la semilla está fija a 12345678 para no tener problemas de aleatoriedad. El número de evaluaciones máxima de todos los algoritmos es de 15000. Por lo demás, todos los demás parámetros propios de cada algoritmo están tal y como se explica en el guión ($25$ número de búsquedas en BMB e ILS, 10\% de mutación en ILS, etc). \\
+
+    \newpage
+
+    \centerline{KNN}
+    \input{Tables/KNN-result.tex}\\
+    \centerline{SFS}
+    \input{Tables/SFS-result.tex}
+    \\ \centerline{EGA}
+    \input{Tables/EGA-result.tex}\\
+    \\ \centerline{GGA}
+    \input{Tables/GGA-result.tex}
+    \newpage
+    \centerline{Media}
+    \input{Tables/Average3-result.tex}\\
+
+    En primer lugar, comentamos los 2 algoritmos principales: el KNN y el SFS. El primero de ellos obtiene una buena tasa de acierto en la base de datos pequeña, \emph{Wdbc}, y cuanto más grande es la base de datos, más solapamiento se produce y menos tasa de acierto va teniendo.
+
+    El SFS se caracteriza por tener una tasa de acierto que sólo mejora en la base de datos más grande a la del KNN, pero tiene una tasa de reducción bastante alta, ya que al partir de una solución sin características y al parar en cuanto no hay mejora, es muy fácil que se quede con muy pocas características.
+
+    Ahora evaluamos las tres metaheurísticas implementadas. La BMB funciona bastante bien sobre estas tres bases de datos. En \emph{Wdbc} tiene la segunda mejor tasa de clasficiación en el conjunto de test, con una tasa de reducción del 36\%, lo cual no es nada despreciable. En \emph{Movement Libras} es la metaheurística que consigue la mejor tasa de clasificación en el conjunto de test, con una reducción de casi el 50\% de las características. En estas dos bases de datos el tiempo que tarda es muy pequeño, ni siquiera 5 segundos. No es así en el caso de \emph{Arrhythmia}, donde tarda más de un minuto y se queda a mitad de la tabla en cuanto a tasa de acierto, aunque reduce en casi la mitad también el número de características.
+
+    Ahora vamos con el GRASP. Es el algoritmo con mejor tasa de acierto dentro de la muestra en las tres bases de datos. Fuera de la muestra se comporta bastante bien, sobre todo en las bases de datos grandes: en Arrhythmia consigue una grandísima tasa de acierto de más del 71\% con un 92\% de reducción de las características, tardando además sólo 34 segundos en esta gran base de datos. En las pequeñas también tiene una tasa de reducción bastante notable.
+
+    Por último, el ILS. Sólo en \emph{Arrhythmia} se comporta peor que cualquier otro fuera de la muestra, pero en las tres bases de datos es la que menos reduce el número de características.
+
+    Posiblemente, el primer algoritmo que probaría de estos 3 en este problema sería un GRASP. Tasa de acierto muy competitiva, tasa de reducción casi insuperable y unos tiempos de ejecución muy razonables.
+
+
+  \section{Referencias}
+
+  Las referencias utilizadas han sido:
+  \begin{itemize}
+    \item \emph{Scikit-Learn}: La propia \fnurl{documentación}{http://scikit-learn.org/stable/modules/classes.html} de la biblioteca.
+    \item \emph{SciPy}: La propia \fnurl{documentación}{http://docs.scipy.org/doc/scipy/reference/} de la biblioteca.
+  \end{itemize}
+
+\end{document}
