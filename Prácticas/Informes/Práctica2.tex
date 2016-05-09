@@ -73,6 +73,9 @@
                 etiquetas_entrenamiento, clasificador,
                  mutacion(caracteristicas_seleccionadas))
 
+            # Como la búsqueda local nunca empeora la solución, no tenemos
+            # que comparar la anterior con la nueva,
+            # comparamos directamente con la mejorgit
             Si nueva_tasa > mejor_tasa:
                 mejor_tasa = nueva_tasa
                 mejor_solucion = nuevas_caracteristicas
