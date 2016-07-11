@@ -42,12 +42,14 @@ def SFS(data_train, target_train, classifier):
 
     return selected_features, best_score
 
-def LS(data_train, target_train, classifier, initial_sol = None, max_iter = 15000, actual_iters = 0):
+def LS(data_train, target_train, classifier, initial_sol = None, max_iter = None, evals_done = 0):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
+    max_evals = 15000
 
     if initial_sol is None:
         initial_sol = np.random.choice([True, False], rowsize)
+
 
     selected_features = initial_sol
 
@@ -55,13 +57,19 @@ def LS(data_train, target_train, classifier, initial_sol = None, max_iter = 1500
 
     best_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
     evaluations = 0
-    while not end and evaluations < max_iter:
+    iterations = 0
+    while not end and evaluations < max_evals:
+        if max_iter is not None:
+            if iterations < max_iter:
+                iterations += 1
+            else:
+                break
         l_neighbors = list(enumerate(selected_features))
         np.random.shuffle(l_neighbors)
         for idx, feature in l_neighbors:
             if feature:
                 continue
-            if evaluations >= max_iter:
+            if evaluations >= max_evals:
                 break
 
             flip(selected_features, idx)
@@ -79,7 +87,7 @@ def LS(data_train, target_train, classifier, initial_sol = None, max_iter = 1500
         else:
             end = True
 
-    actual_iters = evaluations
+    evals_done = evaluations
 
     return selected_features, best_score
 
@@ -488,10 +496,10 @@ def GA(data_train, target_train, classifier, generational=False, uniform=False, 
                 for idx,individual in enumerate(selected):
                     if prob_LS > 0:
                         if np.random.uniform() < prob_LS:
-                            individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, initial_sol = individual["chromosome"], max_iter = 1, actual_iters = meme_iters)
+                            individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, initial_sol = individual["chromosome"], max_iter = 1, evals_done = meme_iters)
                     else:
                         if (selected_number - idx) <= 0.1 * population_size:
-                            individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, initial_sol = individual["chromosome"], max_iter = 1, actual_iters = meme_iters)
+                            individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, initial_sol = individual["chromosome"], max_iter = 1, evals_done = meme_iters)
                     evaluations += meme_iters
 
         ### Replace
