@@ -42,7 +42,7 @@ def SFS(data_train, target_train, classifier):
 
     return selected_features, best_score
 
-def LS(data_train, target_train, classifier, initial_sol = None):
+def LS(data_train, target_train, classifier, initial_sol = None, max_iter = 15000, actual_iters = 0):
     rowsize = len(data_train[0])
     data_number = data_train.shape[0]
 
@@ -55,13 +55,13 @@ def LS(data_train, target_train, classifier, initial_sol = None):
 
     best_score = classifier.scoreSolution(data_train[:, selected_features], target_train)
     evaluations = 0
-    while not end and evaluations < MAX_EVALUATIONS:
+    while not end and evaluations < max_iter:
         l_neighbors = list(enumerate(selected_features))
         np.random.shuffle(l_neighbors)
         for idx, feature in l_neighbors:
             if feature:
                 continue
-            if evaluations >= MAX_EVALUATIONS:
+            if evaluations >= max_iter:
                 break
 
             flip(selected_features, idx)
@@ -78,6 +78,8 @@ def LS(data_train, target_train, classifier, initial_sol = None):
                 break
         else:
             end = True
+
+    actual_iters = evaluations
 
     return selected_features, best_score
 
@@ -397,7 +399,7 @@ def ILS(data_train, target_train, classifier):
 
     return best_solution, best_score
 
-def GA(data_train, target_train, classifier, generational=False, uniform=False):
+def GA(data_train, target_train, classifier, generational=False, uniform=False, memetic = False, prob_LS = 1):
     def twoPointXover(mother, father):
         x_points = np.random.randint(1,rowsize-1,2)
         mother["chromosome"][x_points[0]:x_points[1]], father["chromosome"][x_points[0]:x_points[1]] = father["chromosome"][x_points[0]:x_points[1]], mother["chromosome"][x_points[0]:x_points[1]]
@@ -415,6 +417,8 @@ def GA(data_train, target_train, classifier, generational=False, uniform=False):
 
 
     rowsize = len(data_train[0])
+
+    generations = 0
 
     evaluations = 0
     max_eval = 15000
@@ -447,6 +451,7 @@ def GA(data_train, target_train, classifier, generational=False, uniform=False):
     ##################################
 
     while evaluations < max_eval:
+        generations += 1
 
         best_solution = population[-1] # Take the best
 
@@ -470,16 +475,24 @@ def GA(data_train, target_train, classifier, generational=False, uniform=False):
 
             flip(selected[mut_chromosome]["chromosome"],mut_gene)
 
-        ### Memetic ?
-        # for individual in selected:
-        #     individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, individual["chromosome"])
-
         ### Update child's score
         for individual in selected:
             evaluations += 1
             individual["score"] = classifier.scoreSolution(data_train[:,individual["chromosome"]],target_train)
         selected.sort(order="score")
 
+        ### Memetic
+        if memetic:
+            if generations % 10 == 0:
+                meme_iters = 0
+                for idx,individual in enumerate(selected):
+                    if prob_LS > 0:
+                        if np.random.uniform() < prob_LS:
+                            individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, initial_sol = individual["chromosome"], max_iter = 1, actual_iters = meme_iters)
+                    else:
+                        if idx <= 0.1 * population_size:
+                            individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, initial_sol = individual["chromosome"], max_iter = 1, actual_iters = meme_iters)
+                    evaluations += meme_iters
 
         ### Replace
         for idx in range(selected_number):
@@ -496,3 +509,12 @@ def GGA(data_train, target_train, classifier):
 
 def EGA(data_train, target_train, classifier):
     return GA(data_train, target_train, classifier, generational=False, uniform=False)
+
+def AM1010(data_train, target_train, classifier):
+    return GA(data_train, target_train, classifier, generational=True, uniform=False, memetic = True, prob_LS = 1)
+
+def AM1001(data_train, target_train, classifier):
+    return GA(data_train, target_train, classifier, generational=True, uniform=False, memetic = True, prob_LS = 0.1)
+
+def AM1001mej(data_train, target_train, classifier):
+    return GA(data_train, target_train, classifier, generational=True, uniform=False, memetic = True, prob_LS = -0.1)
