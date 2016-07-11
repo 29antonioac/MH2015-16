@@ -1,0 +1,219 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{kvoptions-patch}
+\usepackage[titulo={Práctica 3: Algoritmos genéticos}]{estilo}
+
+
+
+\begin{document}
+  \maketitle
+  \tableofcontents
+  \newpage
+
+  \section{Descripción del problema}
+
+    \input{description.tex}
+
+  \section{Descripción de aplicación de los algoritmos al problema}
+    \input{comunes.tex}
+  \section{Descripción de la estructura del método de búsqueda}
+    Ambos algoritmos se han implementado con el mismo código. Sólo varía un booleano en la llamada a la función, que altera el número de cromosomas cogidos para la selección y en la presencia del elitismo.
+    \begin{itemize}
+      \item Algoritmo genético: Igual al genético de la práctica 3 pero con
+      la componente híbrida.
+        \begin{verbatim}
+          tamaño_cromosoma = número de características
+          evaluaciones = 0
+          max_evaluaciones = 15000
+
+          probabilidad_cruce = 0.7
+          probabilidad_mutacion = 0.001
+
+          tamaño_poblacion = 30
+
+          Si es generacional, numero_seleccionados = tamaño_poblacion
+          si no, numero_seleccionados = 2
+
+          numero_cruces = EnteroPorArriba(probabilidad_cruce *
+                            numero_seleccionados / 2)
+
+          # Esta probabilidad es la probabilidad de que un cromosoma mute.
+          # Esto lo hacemos para evitar trabajar a nivel de gen y generar el
+          # mínimo número de aleatorios posible, además de homogeneizar
+          # la implementación de ambas variantes del algoritmo
+          probabilidad_total_mutacion = probabilidad_mutacion *
+                  numero_seleccionadas * tamaño_cromosoma
+
+          # Inicializar la población y evaluarla
+          poblacion = Generar "tamaño_poblacion" cromosomas aleatorios
+          evaluar(poblacion)
+          # Ordenamos la población por tasa en orden creciente
+          ordenar(poblacion)
+
+          Mientras evaluaciones < max_evaluaciones
+            # Cogemos la solución que está en último lugar,
+            # ya que la población está ordenada
+            mejor_solucion = poblacion[-1]
+
+            # Selección
+            Para cada i en [1,2,...,numero_seleccionados]
+              eleccion = Coger 2 individuos aleatorios de la población
+              ordenar(poblacion)
+              mejor = eleccion[-1]
+              seleccionados.añadir(mejor)
+
+            # Cruce
+            Para cada i en [1,2,...numero_cruces] tomados de dos en dos
+              cruce(seleccionados[i], seleccionados[i+1])
+
+            # Mutación
+            Si aleatorio() < probabilidad_mutacion_completa
+              cromosoma_mutado = aleatorio()
+              gen_mutado = aleatorio()
+
+              flip(cromosoma_mutado, gen_mutado)
+
+            # Actualizar tasas
+            evaluar(seleccionados)
+            evaluaciones = evaluaciones + numero_seleccionados
+
+            # Componente híbrida
+            Para cada i en [1,2,..., numero_seleccionados]
+              Si se da la condición de hibridación
+                poblacion[i] = BusquedaLocal con solución inicial poblacion[i]
+
+            # Reemplazo
+            Para cada i en [1,2,..., numero_seleccionados]
+              # Reemplazamos los peores de la población por los mejores seleccionados
+              poblacion[i] = seleccionados[-i]
+            Si es generacional y mejor_solucion[tasa] > poblacion[0][tasa]
+              # Sustituimos la peor solución de la población por la mejor que había
+              # Elitismo
+              poblacion[0] = mejor_solucion
+
+          ordenar(poblacion)
+          mejor_solucion, mejor_tasa = poblacion[-1][cromosoma], poblacion[-1][tasa]
+          return mejor_solucion
+        \end{verbatim}
+        \item Búsqueda Local: Se le ha tenido que añadir una componente
+        para almacenar las iteraciones consumidas, ya que al hibridar sólo se
+        puede permitir una.
+          \begin{verbatim}
+            caracteristicas = generaSolAleatoria()
+            fin = Falso
+            mejor_tasa = coste(caracteristicas)
+            evaluaciones = 0
+
+            Mientras haya_mejora y evaluaciones < MAXIMO_EVALUACIONES y iteraciones < maximo_iteraciones
+              lista_vecinos = aleatoriza(caracteristicas)
+              Para cada caracteristica de lista_vecinos no activa
+
+                flip(caracteristicas, indice_caracteristica)
+                tasa = coste(caracteristicas)
+                flip(caracteristicas, indice_caracteristica)
+
+                si tasa > mejor_tasa:
+                  mejor_tasa = tasa
+                  flip(caracteristicas,indice_caracteristica)
+            evaluaciones_hechas = evaluaciones
+              \end{verbatim}
+    \end{itemize}
+
+
+  \section{Descripción del algoritmo de comparación}
+    \input{comparacion.tex}
+  \section{Desarrollo de la práctica}
+    En primer lugar, comentar que las bases de datos han sido modificadas en su estructura (que no en sus datos) para que sean homogéneas. Así, se han puesto todas las clases como numéricas (en Wdbc no lo estaban) y se han colocado en la última columna.
+
+    La práctica se ha desarrollado usando el lenguage de programación \emph{Python}, ya que su velocidad de desarrollo es bastante alta. Para intentar lidiar con la lentitud que puede suponer usar un lenguaje interpretado, utilizaremos las librerías \emph{NumPy, SciPy y Scikit-Learn}, que tienen módulos implementados en C (sobre todo \emph{NumPy}) y agilizan bastante los cálculos y el manejo de vectores grandes. Para el KNN con Leave One Out se ha utilizado un módulo que ha desarrollado mi compañero \fnurl{Alejandro García Montoro}{https://github.com/agarciamontoro/metaheuristics}, que usa \emph{CUDA} para agilizar los cálculos usando la GPU.
+
+    Usaremos alguna funcionalidad directa de estas bibliotecas:
+    \begin{itemize}
+      \item \emph{NumPy}: Generación de números aleatorios y operaciones rápidas sobre vectores.
+      \item \emph{SciPy}: Lectura de ficheros ARFF de WEKA.
+      \item \emph{Scikit-Learn}: Particionamiento de los datos, se han usado las particiones estratificadas de la validación cruzada 5x2.
+      \item \emph{ScorerGPU}: Para el KNN con Leave One Out.
+    \end{itemize}
+
+    Esta elección se ha hecho para poder preocuparme sólo y exclusivamente de la implementación de las metaheurísticas.
+
+    Los requisitos para ejecutar mis prácticas son \emph{Python3} (importante que sea la 3), \emph{NumPy}, \emph{SciPy}, \emph{Scikit-Learn} y \emph{CUDA}, por lo que es necesario una gráfica nVidia. En mi plataforma (Archlinux) están disponibles desde su gestor de paquetes.
+
+    Una vez instalados los paquetes, sólo hay que ejecutar la práctica diciéndole al programa los algoritmos que queremos ejecutar. La semilla aleatoria está fijada dentro del código como 12345678 para no inducir a errores. Veamos algunos ejemplos de llamadas a la práctica. Primero notamos que los algoritmos disponibles son:
+
+    \begin{itemize}
+      \item -SFS: Ejecuta el algoritmo greedy SFS.
+      \item -LS: Ejecuta la Local Search.
+      \item -SA: Ejecuta el Simulated Annealing.
+      \item -TS: Ejecuta la Tabu Search.
+      \item -TSext: Ejecuta la Tabu Search extendida.
+      \item -BMB: Ejecuta la Búsqueda Multiarranque Básica.
+      \item -GRASP: Ejecuta el GRASP.
+      \item -ILS: Ejecuta la Iterated Local Search.
+      \item -EGA: Ejecuta el genético estacionario.
+      \item -GGA: Ejecuta el genético generacional.
+      \item -AM1010: Ejecuta el memético con hibridación total.
+      \item -AM1001: Ejecuta el memético con hibridación del 10\% aleatorio.
+      \item -AM1001mej: Ejecuta el memético con hibridación del 10\% mejor.
+    \end{itemize}
+
+    \begin{verbatim}
+      $ python featureSelection.py -TS
+    \end{verbatim}
+    Se ejecutará la Tabu Search. Pero no sólo se limita el programa a un algoritmo. Si le pasamos varios, los ejecutará en serie uno detrás de otro. Esto ha cambiado desde la práctica anterior por la entrada de \emph{CUDA}, que hay que iniciarlo debidamente y no es tan sencillo de ejecutar cosas en paralelo.
+
+    \begin{verbatim}
+      $ python featureSelection.py -EGA -GGA
+    \end{verbatim}
+    Se ejecutarán EGA y GGA en serie.
+
+    Una vez ejecutado, irán saliendo por pantalla mensajes de este tipo, que proporcionan datos en tiempo real del estado de la ejecución:
+
+    \begin{verbatim}
+      INFO:__main__:W - TS - Time elapsed: 2265.526112794876.
+      Score: 98.2394337654. Score out: 95.0877192982 Selected features: 15
+    \end{verbatim}
+
+    Este mensaje nos dice todo lo necesario: W es la base de datos (Wdbc), TS el algoritmo, el tiempo transcurrido para esta iteración (recordemos que hay 10), el score de entrenamiento, el score de validación y las características seleccionadas.
+  \section{Experimentos}
+    Como se ha comentado antes, la semilla está fija a 12345678 para no tener problemas de aleatoriedad. El número de evaluaciones máxima de todos los algoritmos es de 15000. Por lo demás, todos los demás parámetros propios de cada algoritmo están tal y como se explica en el guión ($25$ número de búsquedas en BMB e ILS, 10\% de mutación en ILS, etc). \\
+
+    \newpage
+
+    \centerline{KNN}
+    \input{Tables/KNN-result.tex}\\
+    \centerline{SFS}
+    \input{Tables/SFS-result.tex}
+    \\ \centerline{EGA}
+    \input{Tables/AM1010-result.tex}\\
+    \\ \centerline{UXEGA}
+    \input{Tables/AM1001-result.tex}\\
+    \\ \centerline{GGA}
+    \input{Tables/AM1001mej-result.tex}
+    \centerline{Media}
+    \input{Tables/Average5-result.tex}\\
+
+    En primer lugar, comentamos los 2 algoritmos principales: el KNN y el SFS. El primero de ellos obtiene una buena tasa de acierto en la base de datos pequeña, \emph{Wdbc}, y cuanto más grande es la base de datos, más solapamiento se produce y menos tasa de acierto va teniendo.
+
+    El SFS se caracteriza por tener una tasa de acierto que sólo mejora en la base de datos más grande a la del KNN, pero tiene una tasa de reducción bastante alta, ya que al partir de una solución sin características y al parar en cuanto no hay mejora, es muy fácil que se quede con muy pocas características.
+
+    Ahora evaluamos las metaheurísticas implementadas. En general, ninguno de los algoritmos genéticos (estacionario o generacional, cruce en dos puntos o uniforme), supera al \emph{GRASP} de la práctica anterior: sus tasas de clasificación son, en general, peores, y las tasas de reducción no tienen comparación.
+
+    En particular, el genético estacionario se caracteriza por una convergencia más lenta, ya que apuesta por la exploración del espacio de búsqueda. Es por esto por lo que consigue unas tasas de reducción mayor, en detrimento de la tasa de clasificación, que al no explotar (recordamos que la función fitness es la tasa de acierto) no mejora lo suficiente la tasa de acierto. Por otro lado, el generacional no reduce tanto el número de características, pero es un poco mejor que el generacional en todos los casos excepto en \emph{Movement Libras}, pero la pérdida es mínima.
+
+    En el caso del operador de cruce, no hay un cambio muy grande: el cruce uniforme da más diversidad que el cruce en dos puntos, por lo que algoritmo que lo use, algoritmo que ganará en diversidad y perderá explotación, lo que se traduce en más reducción y menos tasa de clasifiación. Aunque no hay un cambio brutal (menos de un punto de diferencia en clasificación, más de 2 en reducción), tomaremos este como el ``canónico''.
+
+    Hablando de tiempos, como todos hacen el mismo número de evaluaciones, 15000, no hay apenas diferencia en tiempo entre uno y otro. La diferencia máxima es de unos 30 segundos en la base de datos más grande, \emph{Arrhythmia}, lo cual no es una pérdida muy grande. Por esta razón no debemos fijarnos en el tiempo para elegir uno de estos algoritmos.
+
+    En esta práctica yo me quedaría personalmente con el genético estacionario con cruce uniforme. El cruce uniforme está muy usado en la literatura por ser bastante eficiente en su cometido, ya que introduce más diversidad que el cruce en dos puntos. El estacionario hemos visto que tiene muy poca pérdida con respecto al generacional, con la ventaja de que tiene tasa de reducción de columnas notable. Un poco menos de precisión, pero el tamaño del problema se hará notablemente más pequeño.
+
+  \newpage
+  \section{Referencias}
+
+  Las referencias utilizadas han sido:
+  \begin{itemize}
+    \item \emph{Scikit-Learn}: La propia \fnurl{documentación}{http://scikit-learn.org/stable/modules/classes.html} de la biblioteca.
+    \item \emph{SciPy}: La propia \fnurl{documentación}{http://docs.scipy.org/doc/scipy/reference/} de la biblioteca.
+  \end{itemize}
+
+\end{document}
