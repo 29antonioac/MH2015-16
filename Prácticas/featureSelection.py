@@ -33,7 +33,7 @@ def main(algorithm):
     arg_algorithms = {"-KNN" : KNN, "-SFS" : SFS, "-LS" : LS, "-SA" : SA, "-TS" : TS, "-TSext" : TSext,
                         "-BMB" : BMB, "-GRASP" : GRASP, "-ILS" : ILS,
                         "-GGA" : GGA, "-EGA" : EGA,
-                        "-AM1010" : AM1010 }
+                        "-AM1010" : AM1010, "-AM1001" : AM1001, "-AM1001mej" : AM1001mej }
     algorithm_table = {}
     alg = arg_algorithms[algorithm]
 

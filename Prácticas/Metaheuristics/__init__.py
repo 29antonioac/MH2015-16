@@ -490,7 +490,7 @@ def GA(data_train, target_train, classifier, generational=False, uniform=False, 
                         if np.random.uniform() < prob_LS:
                             individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, initial_sol = individual["chromosome"], max_iter = 1, actual_iters = meme_iters)
                     else:
-                        if idx <= 0.1 * population_size:
+                        if (selected_number - idx) <= 0.1 * population_size:
                             individual["chromosome"], individual["score"] = LS(data_train, target_train, classifier, initial_sol = individual["chromosome"], max_iter = 1, actual_iters = meme_iters)
                     evaluations += meme_iters
 
