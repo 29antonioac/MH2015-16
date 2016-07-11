@@ -1,7 +1,7 @@
 \documentclass[a4paper, 11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{kvoptions-patch}
-\usepackage[titulo={Práctica 3: Algoritmos genéticos}]{estilo}
+\usepackage[titulo={Práctica 5: Algoritmos híbridos}]{estilo}
 
 
 
@@ -17,10 +17,15 @@
   \section{Descripción de aplicación de los algoritmos al problema}
     \input{comunes.tex}
   \section{Descripción de la estructura del método de búsqueda}
-    Ambos algoritmos se han implementado con el mismo código. Sólo varía un booleano en la llamada a la función, que altera el número de cromosomas cogidos para la selección y en la presencia del elitismo.
+    Los tres algoritmos se han implementado con el mismo código. Sólo varía un
+    booleano en la llamada a la función, que indica si es un algoritmo memético,
+    y un real que designa la probabilidad de utilizar la búsqueda local. Si
+    es negativo, no es una probabilidad sino una proporción real.
     \begin{itemize}
       \item Algoritmo genético: Igual al genético de la práctica 3 pero con
-      la componente híbrida.
+      la componente híbrida. La condición de hibridación se ha modelado de 3
+      formas. La primera es mejorar todos los cromosomas de la población. La
+      segunda, mejorar un 10\% aleatorio. La tercera, mejorar los 10\% mejores.
         \begin{verbatim}
           tamaño_cromosoma = número de características
           evaluaciones = 0
@@ -104,7 +109,8 @@
             mejor_tasa = coste(caracteristicas)
             evaluaciones = 0
 
-            Mientras haya_mejora y evaluaciones < MAXIMO_EVALUACIONES y iteraciones < maximo_iteraciones
+            Mientras haya_mejora y evaluaciones < MAXIMO_EVALUACIONES
+            y iteraciones < maximo_iteraciones
               lista_vecinos = aleatoriza(caracteristicas)
               Para cada caracteristica de lista_vecinos no activa
 
@@ -115,6 +121,7 @@
                 si tasa > mejor_tasa:
                   mejor_tasa = tasa
                   flip(caracteristicas,indice_caracteristica)
+                  hay_mejora = Verdadero
             evaluaciones_hechas = evaluaciones
               \end{verbatim}
     \end{itemize}
@@ -176,7 +183,7 @@
 
     Este mensaje nos dice todo lo necesario: W es la base de datos (Wdbc), TS el algoritmo, el tiempo transcurrido para esta iteración (recordemos que hay 10), el score de entrenamiento, el score de validación y las características seleccionadas.
   \section{Experimentos}
-    Como se ha comentado antes, la semilla está fija a 12345678 para no tener problemas de aleatoriedad. El número de evaluaciones máxima de todos los algoritmos es de 15000. Por lo demás, todos los demás parámetros propios de cada algoritmo están tal y como se explica en el guión ($25$ número de búsquedas en BMB e ILS, 10\% de mutación en ILS, etc). \\
+    Como se ha comentado antes, la semilla está fija a 12345678 para no tener problemas de aleatoriedad. El número de evaluaciones máxima de todos los algoritmos es de 15000. Por lo demás, todos los demás parámetros propios de cada algoritmo están tal y como se explica en el guión. \\
 
     \newpage
 
@@ -184,11 +191,11 @@
     \input{Tables/KNN-result.tex}\\
     \centerline{SFS}
     \input{Tables/SFS-result.tex}
-    \\ \centerline{EGA}
+    \\ \centerline{AM1010}
     \input{Tables/AM1010-result.tex}\\
-    \\ \centerline{UXEGA}
+    \\ \centerline{AM1001}
     \input{Tables/AM1001-result.tex}\\
-    \\ \centerline{GGA}
+    \\ \centerline{AM1001mej}
     \input{Tables/AM1001mej-result.tex}
     \centerline{Media}
     \input{Tables/Average5-result.tex}\\
@@ -197,13 +204,13 @@
 
     El SFS se caracteriza por tener una tasa de acierto que sólo mejora en la base de datos más grande a la del KNN, pero tiene una tasa de reducción bastante alta, ya que al partir de una solución sin características y al parar en cuanto no hay mejora, es muy fácil que se quede con muy pocas características.
 
-    Ahora evaluamos las metaheurísticas implementadas. En general, ninguno de los algoritmos genéticos (estacionario o generacional, cruce en dos puntos o uniforme), supera al \emph{GRASP} de la práctica anterior: sus tasas de clasificación son, en general, peores, y las tasas de reducción no tienen comparación.
+    Ahora evaluamos las metaheurísticas implementadas. Los meméticos son capaces de superar al GRASP en términos de clasificación en las bases de datos pequeñas. En \emph{Arrhythmia} sigue ganando el GRASP con un par de puntos de ventaja.
 
-    En particular, el genético estacionario se caracteriza por una convergencia más lenta, ya que apuesta por la exploración del espacio de búsqueda. Es por esto por lo que consigue unas tasas de reducción mayor, en detrimento de la tasa de clasificación, que al no explotar (recordamos que la función fitness es la tasa de acierto) no mejora lo suficiente la tasa de acierto. Por otro lado, el generacional no reduce tanto el número de características, pero es un poco mejor que el generacional en todos los casos excepto en \emph{Movement Libras}, pero la pérdida es mínima.
+    En particular, los meméticos no obtienen una mejora sustancial en clasficación con respecto a los genéticos sin hibridar. Sólo en la base de datos más grande, \emph{Arrhythmia}, consiguen mejorar el resultado en clasificación de sus predecesores. Esto podría ser porque la diversidad que teneran los genéticos por sí mismos es suficiente para los problemas más pequeños, pero no son capaces de explotar bien según qué zonas del espacio de búsqueda si éste es muy grande. Por esta razón, es posible que este tipo de algoritmos funcionara mejor en bases de datos más grandes todavía.
 
-    En el caso del operador de cruce, no hay un cambio muy grande: el cruce uniforme da más diversidad que el cruce en dos puntos, por lo que algoritmo que lo use, algoritmo que ganará en diversidad y perderá explotación, lo que se traduce en más reducción y menos tasa de clasifiación. Aunque no hay un cambio brutal (menos de un punto de diferencia en clasificación, más de 2 en reducción), tomaremos este como el ``canónico''.
+    El tiempo extra que tardan estos algoritmos no compensa demasiado la ganancia que tienen, al menos en las bases de datos pequeñas. En \emph{Arrhythmia} sí que se debe intentar rascar cualquier punto de más en clasificación puesto que de por sí la tasa de clasificación no es muy buena.
 
-    Hablando de tiempos, como todos hacen el mismo número de evaluaciones, 15000, no hay apenas diferencia en tiempo entre uno y otro. La diferencia máxima es de unos 30 segundos en la base de datos más grande, \emph{Arrhythmia}, lo cual no es una pérdida muy grande. Por esta razón no debemos fijarnos en el tiempo para elegir uno de estos algoritmos.
+    El número de individuos a mejorar con hibridación altera el equilibrio diversidad-explotación que tanto se trabaja en este campo, pero no se consiguen resultados muy dispares, ya que el equilibrio tiende más a la explotación al utilizar la búsqueda local.
 
     En esta práctica yo me quedaría personalmente con el genético estacionario con cruce uniforme. El cruce uniforme está muy usado en la literatura por ser bastante eficiente en su cometido, ya que introduce más diversidad que el cruce en dos puntos. El estacionario hemos visto que tiene muy poca pérdida con respecto al generacional, con la ventaja de que tiene tasa de reducción de columnas notable. Un poco menos de precisión, pero el tamaño del problema se hará notablemente más pequeño.
 
