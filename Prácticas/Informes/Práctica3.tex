@@ -63,10 +63,7 @@
 
             # Cruce
             Para cada i en [1,2,...numero_cruces] tomados de dos en dos
-              puntos_cruce = tomar dos aleatorios entre 1 y el tamaño del cromosoma
-
-              # El operador de cruce es el típico en dos puntos
-              cruce(seleccionados[i], seleccionados[i+1], puntos_cruce)
+              cruce(seleccionados[i], seleccionados[i+1])
 
             # Mutación
             Si aleatorio() < probabilidad_mutacion_completa
@@ -84,7 +81,8 @@
               # Reemplazamos los peores de la población por los mejores seleccionados
               poblacion[i] = seleccionados[-i]
             Si es generacional y mejor_solucion[tasa] > poblacion[0][tasa]
-              # Sustituimos la peor solución de la población por la mejor que había (elisismo)
+              # Sustituimos la peor solución de la población por la mejor que había
+              # Elitismo
               poblacion[0] = mejor_solucion
 
           ordenar(poblacion)
@@ -93,6 +91,27 @@
         \end{verbatim}
     \end{itemize}
 
+    Debemos detallar más el operador de cruce (el de mutación es claro). Se han implementado dos operadores: el clásico en dos puntos y el uniforme.
+
+    El de cruce en dos puntos no es más que tomar dos puntos aleatorios del cromosoma e intercambiar las regiones que quedan dentro de ambos.
+
+    \begin{verbatim}
+      # Tomamos los puntos de cruce en el interior
+      # En el interior es sin tomar los extremos,
+      # para evitar que sea un cruce en un punto.
+      puntos_cruce = tomar dos aleatorios entre 1 y tamaño-1
+      intercambiaCentros(padre, madre)
+    \end{verbatim}
+
+    El otro operador es el cruce uniforme. Para cada gen, se intercambian los genes de los padres con probabilidad $\frac{1}{2}$.
+
+    \begin{verbatim}
+      Para cada gen
+        Si aleatorio() < 0.5
+          Intercambia(padre[gen], madre[gen])
+    \end{verbatim}
+
+    En la tabla de resultados aparecen ambos operadores.
 
   \section{Descripción del algoritmo de comparación}
     \input{comparacion.tex}
@@ -157,9 +176,13 @@
     \input{Tables/SFS-result.tex}
     \\ \centerline{EGA}
     \input{Tables/EGA-result.tex}\\
+    \\ \centerline{UXEGA}
+    \input{Tables/UXEGA-result.tex}\\
     \\ \centerline{GGA}
     \input{Tables/GGA-result.tex}
     \newpage
+    \centerline{UXGGA}
+    \input{Tables/UXGGA-result.tex}
     \centerline{Media}
     \input{Tables/Average3-result.tex}\\
 
@@ -167,15 +190,17 @@
 
     El SFS se caracteriza por tener una tasa de acierto que sólo mejora en la base de datos más grande a la del KNN, pero tiene una tasa de reducción bastante alta, ya que al partir de una solución sin características y al parar en cuanto no hay mejora, es muy fácil que se quede con muy pocas características.
 
-    Ahora evaluamos las tres metaheurísticas implementadas. La BMB funciona bastante bien sobre estas tres bases de datos. En \emph{Wdbc} tiene la segunda mejor tasa de clasficiación en el conjunto de test, con una tasa de reducción del 36\%, lo cual no es nada despreciable. En \emph{Movement Libras} es la metaheurística que consigue la mejor tasa de clasificación en el conjunto de test, con una reducción de casi el 50\% de las características. En estas dos bases de datos el tiempo que tarda es muy pequeño, ni siquiera 5 segundos. No es así en el caso de \emph{Arrhythmia}, donde tarda más de un minuto y se queda a mitad de la tabla en cuanto a tasa de acierto, aunque reduce en casi la mitad también el número de características.
+    Ahora evaluamos las metaheurísticas implementadas. En general, ninguno de los algoritmos genéticos (estacionario o generacional, cruce en dos puntos o uniforme), supera al \emph{GRASP} de la práctica anterior: sus tasas de clasificación son, en general, peores, y las tasas de reducción no tienen comparación.
 
-    Ahora vamos con el GRASP. Es el algoritmo con mejor tasa de acierto dentro de la muestra en las tres bases de datos. Fuera de la muestra se comporta bastante bien, sobre todo en las bases de datos grandes: en Arrhythmia consigue una grandísima tasa de acierto de más del 71\% con un 92\% de reducción de las características, tardando además sólo 34 segundos en esta gran base de datos. En las pequeñas también tiene una tasa de reducción bastante notable.
+    En particular, el genético estacionario se caracteriza por una convergencia más lenta, ya que apuesta por la exploración del espacio de búsqueda. Es por esto por lo que consigue unas tasas de reducción mayor, en detrimento de la tasa de clasificación, que al no explotar (recordamos que la función fitness es la tasa de acierto) no mejora lo suficiente la tasa de acierto. Por otro lado, el generacional no reduce tanto el número de características, pero es un poco mejor que el generacional en todos los casos excepto en \emph{Movement Libras}, pero la pérdida es mínima.
 
-    Por último, el ILS. Sólo en \emph{Arrhythmia} se comporta peor que cualquier otro fuera de la muestra, pero en las tres bases de datos es la que menos reduce el número de características.
+    En el caso del operador de cruce, no hay un cambio muy grande: el cruce uniforme da más diversidad que el cruce en dos puntos, por lo que algoritmo que lo use, algoritmo que ganará en diversidad y perderá explotación, lo que se traduce en más reducción y menos tasa de clasifiación. Aunque no hay un cambio brutal (menos de un punto de diferencia en clasificación, más de 2 en reducción), tomaremos este como el ``canónico''.
 
-    Posiblemente, el primer algoritmo que probaría de estos 3 en este problema sería un GRASP. Tasa de acierto muy competitiva, tasa de reducción casi insuperable y unos tiempos de ejecución muy razonables.
+    Hablando de tiempos, como todos hacen el mismo número de evaluaciones, 15000, no hay apenas diferencia en tiempo entre uno y otro. La diferencia máxima es de unos 30 segundos en la base de datos más grande, \emph{Arrhythmia}, lo cual no es una pérdida muy grande. Por esta razón no debemos fijarnos en el tiempo para elegir uno de estos algoritmos.
 
+    En esta práctica yo me quedaría personalmente con el genético estacionario con cruce uniforme. El cruce uniforme está muy usado en la literatura por ser bastante eficiente en su cometido, ya que introduce más diversidad que el cruce en dos puntos. El estacionario hemos visto que tiene muy poca pérdida con respecto al generacional, con la ventaja de que tiene tasa de reducción de columnas notable. Un poco menos de precisión, pero el tamaño del problema se hará notablemente más pequeño.
 
+  \newpage
   \section{Referencias}
 
   Las referencias utilizadas han sido:

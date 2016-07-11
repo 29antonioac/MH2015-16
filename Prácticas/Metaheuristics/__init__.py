@@ -397,7 +397,23 @@ def ILS(data_train, target_train, classifier):
 
     return best_solution, best_score
 
-def GA(data_train, target_train, classifier, generational=False):
+def GA(data_train, target_train, classifier, generational=False, uniform=False):
+    def twoPointXover(mother, father):
+        x_points = np.random.randint(1,rowsize-1,2)
+        mother["chromosome"][x_points[0]:x_points[1]], father["chromosome"][x_points[0]:x_points[1]] = father["chromosome"][x_points[0]:x_points[1]], mother["chromosome"][x_points[0]:x_points[1]]
+        return mother, father
+
+    def uniformXover(mother, father):
+        for pt in range(len(mother)):
+            if np.random.random() < 0.5:
+                mother[pt], father[pt] = father[pt], mother[pt]
+        return mother, father
+
+    xover = twoPointXover
+    if uniform:
+        xover = uniformXover
+
+
     rowsize = len(data_train[0])
 
     evaluations = 0
@@ -445,8 +461,7 @@ def GA(data_train, target_train, classifier, generational=False):
 
         ### Xover
         for idx in range(0,xover_number,2):
-            x_points = np.random.randint(1,rowsize-1,2)
-            selected[idx]["chromosome"][x_points[0]:x_points[1]], selected[idx+1]["chromosome"][x_points[0]:x_points[1]] = selected[idx]["chromosome"][x_points[0]:x_points[1]], selected[idx+1]["chromosome"][x_points[0]:x_points[1]]
+            selected[idx], selected[idx+1] = xover(selected[idx], selected[idx+1])
 
         ### Mutation
         if np.random.uniform() < full_mutation_probability:
@@ -477,7 +492,7 @@ def GA(data_train, target_train, classifier, generational=False):
     return best_solution, best_score
 
 def GGA(data_train, target_train, classifier):
-    return GA(data_train, target_train, classifier, generational=True)
+    return GA(data_train, target_train, classifier, generational=True, uniform=False)
 
 def EGA(data_train, target_train, classifier):
-    return GA(data_train, target_train, classifier, generational=False)
+    return GA(data_train, target_train, classifier, generational=False, uniform=False)
